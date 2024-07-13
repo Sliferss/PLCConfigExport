@@ -20,10 +20,12 @@
     <div class="container-scroller">
         <nav class="sidebar sidebar-offcanvas" id="sidebar">
             <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
-                <a class="sidebar-brand brand-logo navbar-toggler navbar-toggler" data-toggle="minimize"><img src="{% static '/assets/images/logo.svg' %}"
-                        alt="logo" /></a>
-                <a class="sidebar-brand brand-logo-mini navbar-toggler navbar-toggler" data-toggle="minimize"><img src="{% static '/assets/images/logo-mini.svg' %}"
-                        alt="logo" /></a>
+                <a class="sidebar-brand brand-logo" data-toggle="minimize"><img
+                        src="{% static '/assets/images/hollowayicon.svg' %}" alt="logo"
+                        style="height: 5vh; width: 10vw;" /></a>
+                <a class="sidebar-brand brand-logo-mini" data-toggle="minimize"><img
+                        src="{% static '/assets/images/hollowayiconmini.png' %}" alt="logo"
+                        style="height: 5vh; width: 7vw;"/></a>
             </div>
             <ul class="nav">
                 <li class="nav-item nav-category">
@@ -35,6 +37,14 @@
                             <i class="mdi mdi-speedometer"></i>
                         </span>
                         <span class="menu-title">Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item menu-items">
+                    <a class="nav-link" href="index.html">
+                        <span class="menu-icon">
+                            <i class="mdi mdi-speedometer"></i>
+                        </span>
+                        <span class="menu-title">Index</span>
                     </a>
                 </li>
                 <li class="nav-item menu-items">
