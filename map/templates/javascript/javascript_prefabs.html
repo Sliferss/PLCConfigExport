@@ -1,0 +1,64 @@
+<script>
+    $(document).ready(function () {
+        var modal = $('#modal');
+        var modalContent = $('.modal-content');
+        var modalBody = $('#modal-body');
+
+        $('.open-modal').on('click', function () {
+            var formType = $(this).data('form-type');
+            var formHtml = generateForm(formType);
+
+            modalBody.html(formHtml);
+            modal.show();
+            setTimeout(function () {
+                modalContent.addClass('show');
+            }, 10);
+        });
+
+        $('.close').on('click', function () {
+            closeModal();
+        });
+
+        $(window).on('click', function (event) {
+            if (event.target.id === 'modal') {
+                closeModal();
+            }
+        });
+
+        function closeModal() {
+            modalContent.removeClass('show');
+            setTimeout(function () {
+                modal.hide();
+            }, 500);
+        }
+
+        function generateForm(formType) {
+            if (formType === 'create') {
+                return `
+                <h2 class="text-danger">HELLOW WORLD</h2>
+                <form>
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name"><br><br>
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email"><br><br>
+                    <input type="submit" value="Submit">
+                </form>
+            `;
+            } else if (formType === 'form2') {
+                return `
+                <h2>Form 2</h2>
+                <form>
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username"><br><br>
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password"><br><br>
+                    <input type="submit" value="Login">
+                </form>
+            `;
+            } else {
+                return `<p>Unknown form type</p>`;
+            }
+        }
+    });
+
+</script>

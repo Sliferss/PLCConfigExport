@@ -1,7 +1,7 @@
 {% extends 'base.html' %} {% load static %}
 
 {% block body %}
-
+<link rel="stylesheet" href="{% static '/assets/css/modal.css' %}">
 
 <div class="row">
     <div class="col-sm-12 col-md-2">
@@ -9,13 +9,13 @@
     </div>
     <div class="col-sm-12 col-md-10">
         <div class="row">
-            <div class="col-sm-12 col-md-2 grid-margin stretch-card rounded d-flex justify-content-center align-items-center create_box"
-                style="height: 20vh; cursor: pointer;">
+            <div class="col-sm-12 col-md-2 grid-margin stretch-card rounded d-flex justify-content-center align-items-center create_box open-modal"
+                style="height: 20vh; cursor: pointer;" data-form-type="create">
                 <div class="create pb-3" style="font-size: 15vw;">+</div>
             </div>
             {% for prefab in prefabs %}
-            <div class="col-sm-12 col-md-2 grid-margin stretch-card rounded d-flex justify-content-center"
-                style="height: 20vh; cursor: pointer;">
+            <div class="col-sm-12 col-md-2 grid-margin stretch-card rounded d-flex justify-content-center open-modal"
+                style="height: 20vh; cursor: pointer;" data-form-type="{{prefab.name}}">
                 <div class="card d-flex justify-content-center align-items-center">
                     <div class="card-title text-center" style="font-size: 1vw;">{{prefab.name}}</div>
                     {% if prefab.image %}
@@ -28,6 +28,13 @@
             </div>
             {% endfor %}
         </div>
+    </div>
+</div>
+
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <div id="modal-body"></div>
     </div>
 </div>
 
@@ -48,5 +55,7 @@
         background-color: #5cb85c;
     }
 </style>
+
+{% include 'javascript/javascript_prefabs.html' %}
 
 {% endblock %}
