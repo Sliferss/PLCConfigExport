@@ -1,0 +1,52 @@
+{% extends 'base.html' %} {% load static %}
+
+{% block body %}
+
+
+<div class="row">
+    <div class="col-sm-12 col-md-2">
+        <!-- filter -->
+    </div>
+    <div class="col-sm-12 col-md-10">
+        <div class="row">
+            <div class="col-sm-12 col-md-2 grid-margin stretch-card rounded d-flex justify-content-center align-items-center create_box"
+                style="height: 20vh; cursor: pointer;">
+                <div class="create pb-3" style="font-size: 15vw;">+</div>
+            </div>
+            {% for prefab in prefabs %}
+            <div class="col-sm-12 col-md-2 grid-margin stretch-card rounded d-flex justify-content-center"
+                style="height: 20vh; cursor: pointer;">
+                <div class="card d-flex justify-content-center align-items-center">
+                    <div class="card-title text-center" style="font-size: 1vw;">{{prefab.name}}</div>
+                    {% if prefab.image %}
+                    <img src="{{ prefab.image.url }}" alt="{{ prefab.image }}" class="pb-3"
+                        style="object-fit: cover; height: 75%; width: 75%;">
+                    {% else %}
+                    <p style="font-size: 1vw;">No image available</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function () {
+        $('.prefab_view').addClass('active');
+    });
+
+</script>
+
+<style>
+    .create_box {
+        background-color: #286b28;
+    }
+
+    .create_box:hover {
+        background-color: #5cb85c;
+    }
+</style>
+
+{% endblock %}

@@ -13,7 +13,8 @@
     <link rel="stylesheet" href="{% static '/assets/vendors/owl-carousel-2/owl.carousel.min.css' %}">
     <link rel="stylesheet" href="{% static '/assets/vendors/owl-carousel-2/owl.theme.default.min.css' %}">
     <link rel="stylesheet" href="{% static '/assets/css/style.css' %}">
-    <link rel="shortcut icon" href="{% static '/assets/images/favicon.png' %}" />
+    <link rel="shortcut icon" href="{% static '/assets/images/hollowayicon.svg' %}" />
+    <script src="{% static '/assets/js/jquery.js' %}"></script>
 </head>
 
 <body>
@@ -31,19 +32,19 @@
                     <span class="nav-link">Navigation</span>
                 </li>
                 <li class="nav-item menu-items">
-                    <a class="nav-link" href="">
-                        <span class="menu-icon">
-                            <i class="mdi mdi-speedometer"></i>
-                        </span>
-                        <span class="menu-title">Dashboard</span>
-                    </a>
-                </li>
-                <li class="nav-item menu-items">
-                    <a class="nav-link" href="">
+                    <a class="nav-link" href="{% url 'map:index' %}">
                         <span class="menu-icon">
                             <i class="mdi mdi-speedometer"></i>
                         </span>
                         <span class="menu-title">Index</span>
+                    </a>
+                </li>
+                <li class="nav-item menu-items prefab_view">
+                    <a class="nav-link" href="{% url 'map:prefabs_view' %}">
+                        <span class="menu-icon">
+                            <i class="mdi mdi-laptop"></i>
+                        </span>
+                        <span class="menu-title">Prefabs View</span>
                     </a>
                 </li>
                 <li class="nav-item menu-items">
