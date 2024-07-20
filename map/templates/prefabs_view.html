@@ -10,12 +10,12 @@
     <div class="col-sm-12 col-md-10">
         <div class="row">
             <div class="col-sm-12 col-md-2 grid-margin stretch-card rounded d-flex justify-content-center align-items-center create_box open-modal"
-                style="height: 20vh; cursor: pointer;" data-form-type="create">
-                <div class="create pb-3" style="font-size: 15vw;">+</div>
+                style="max-height: 20vh; cursor: pointer;" data-form-type="create">
+                <div class="create pb-3" style="font-size: 14vw;">+</div>
             </div>
             {% for prefab in prefabs %}
             <div class="col-sm-12 col-md-2 grid-margin stretch-card rounded d-flex justify-content-center open-modal"
-                style="height: 20vh; cursor: pointer;" data-form-type="{{prefab.name}}">
+                style="max-height: 20vh; height: 20vh; cursor: pointer;" data-form-type="{{prefab.name}}">
                 <div class="card d-flex justify-content-center align-items-center">
                     <div class="card-title text-center" style="font-size: 1vw;">{{prefab.name}}</div>
                     {% if prefab.image %}
