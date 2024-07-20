@@ -41,7 +41,7 @@
         modalContent.removeClass('show');
         setTimeout(function () {
             modal.hide();
-        }, 500);
+        }, 50);
     }
 
     function generateExistingForm(formType){
@@ -49,21 +49,23 @@
             type:"GET",
             url:"",
             data:{
-                name:formType
+                name:formType,
+                type:"modal_get"
             },
             success(response){
+                console.log(response);
                 if (response.error == true){
-                    alert("Something wrong with database for this prefab");
-                    location.reload();
+                    // alert("Something wrong with database for this prefab");
+                    // location.reload();
                 }
 
-                
+
 
             },
             error(response){
                 console.log(response);
-                alert("Something wrong with database for this prefab");
-                location.reload();
+                // alert("Something wrong with database for this prefab");
+                // location.reload();
             }
         });
     }
@@ -71,18 +73,48 @@
     function generateCreateForm() {
         return `
             <h2 class="text-white text-center">Create Conveyor Prefab</h2>
-            <form class="forms-sample">
+            <form class="forms-sample" id="myForm">
                 `+ form_helper("text", "name", "Name", "") + `
                 `+ form_helper("number", "length", "Length", "") + `
                 `+ form_helper("number", "width", "Width", "") + `
                 `+ form_helper("number", "height", "Height", "") + `
+                `+ form_helper("image", "image", "Image", "") + `
                 <div class="form-group row d-flex justify-content-between">
-                    <div class="col-sm-12 col-md-12 btn btn-primary">
+                    <div class="col-sm-12 col-md-12 btn btn-primary" onclick="submit_form()">
                         Submit
                     </div>
                 </div>
             </form >
         `;
+    }
+
+    function submit_form(){
+        console.log("SUBMIT CLICKED");
+        var formData = $('#myForm').serialize();
+        $.ajax({
+            type:"GET",
+            url:"",
+            data:{
+                name:$("#name").val(),
+                length:$("#length").val(),
+                width:$("#width").val(),
+                height:$("#height").val(),
+                image:$("#image").val(),
+                type:"create"
+            },
+            success(response){
+                console.log(response);
+                if (response.error == true){
+
+                }
+
+
+
+            },
+            error(response){
+                console.log(response);
+            }
+        });
     }
 
 </script>
