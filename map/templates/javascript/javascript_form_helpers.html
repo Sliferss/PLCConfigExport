@@ -1,15 +1,13 @@
 <script>
 
-    function form_helper(type, id, label, value) {
+    function form_helper(type, id, label, value, attr) {
         form_string = `
-        <div class="form-group row d-flex justify-content-between">
-            <div class="col-sm-3 col-form-label">
-                <label for="name" style="font-size:1vw; width:100%;">`+ label + `:</label>
+            <div class="col-sm-2 col-form-label">
+                <label for="name" style="font-size:0.75vw; width:100%;">`+ label + `:</label>
             </div>
-            <div class="col-sm-9" style="font-size:1vw; width:100%;">
-                <input type="`+ type + `" id="` + id + `" name="` + id + `" value="` + value + `">
-            </div>
-        </div>`;
+            <div class="col-sm-4" style="font-size:0.75vw; width:100%;">
+                <input type="`+ type + `" id="` + id + `" name="` + id + `" value="` + value + `" ` + attr + ` >
+            </div>`;
         return form_string
     }
 

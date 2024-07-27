@@ -26,6 +26,7 @@ class PrefabsView(View):
     def post(self, request, *args, **kwargs):
         context = {}
         context["error"] = False
+        self.original_name = request.POST.get("original_name")
         self.name = request.POST.get('name')
         if not self.name:
             context["error"] = "Missing Name!"
@@ -73,30 +74,45 @@ class PrefabsView(View):
         pass
 
     def handle_create(self, context):
-        if PrefabsConveyor.objects.filter(name=self.name):
+        if self.original_name != self.name and PrefabsConveyor.objects.filter(name=self.name):
             context["error"] = "Name Already Exists!"
             return context
-        create_obj = PrefabsConveyor.objects.create(name=self.name)
-        if self.length:
-            create_obj.length = self.length
-        if self.width:
-            create_obj.width = self.width
-        if self.height:
-            create_obj.height = self.height
-        if self.image:
-            image_name = self.image.name
-            image_path = os.path.join(settings.MEDIA_ROOT, image_name)
-            if os.path.exists(image_path):
-                base, ext = os.path.splitext(image_name)
-                unique_id = get_random_string(6)
-                image_name = f"{base}_{unique_id}{ext}"
-                image_path = os.path.join(settings.MEDIA_ROOT, image_name)
-            with open(image_path, 'wb+') as destination:
-                for chunk in self.image.chunks():
-                    destination.write(chunk)
-            print(image_path)
-            create_obj.image = image_path
-            create_obj.save()
-        create_obj.save()
+        if not self.original_name == "create":
+            prefab_obj = PrefabsConveyor.objects.filter(name=self.original_name).first()
+            if self.name and self.name != self.original_name:
+                prefab_obj.name = self.name
+        else:
+            prefab_obj = PrefabsConveyor.objects.create(name=self.name)
+        prefab_obj = self.fill_prefab_fields(prefab_obj)
+        if not self.original_name == "create" and self.original_name != self.name:
+            old_prefab_obj = PrefabsConveyor.objects.filter(name=self.original_name)
+            if old_prefab_obj:
+                old_prefab_obj.delete()
         context["success"] = "Created Prefab: " + self.name
         return context
+
+    def fill_prefab_fields(self, prefab_obj):
+        if self.length:
+            prefab_obj.length = self.length
+        if self.width:
+            prefab_obj.width = self.width
+        if self.height:
+            prefab_obj.height = self.height
+        if self.image:
+            prefab_obj.image = self.upload_image()
+            prefab_obj.save()
+        prefab_obj.save()
+        return prefab_obj
+
+    def upload_image(self):
+        image_name = self.image.name
+        image_path = os.path.join(settings.MEDIA_ROOT, image_name)
+        if os.path.exists(image_path):
+            base, ext = os.path.splitext(image_name)
+            unique_id = get_random_string(6)
+            image_name = f"{base}_{unique_id}{ext}"
+            image_path = os.path.join(settings.MEDIA_ROOT, image_name)
+        with open(image_path, 'wb+') as destination:
+            for chunk in self.image.chunks():
+                destination.write(chunk)
+        return image_path

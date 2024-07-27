@@ -6,21 +6,23 @@
 
     $('.open-modal').on('click', function () {
         var formType = $(this).data('form-type');
+        console.log("form-type: "  + formType);
         if (formType == "create") {
             var formHtml = generateCreateForm();
+            addHtmlToModal(formHtml);
         }
         else {
-            var formHtml = generateExistingForm(formType);
+            generateExistingForm(formType);
         }
+    });
 
-
+    function addHtmlToModal(formHtml){
         modalBody.html(formHtml);
         modal.show();
         setTimeout(function () {
             modalContent.addClass('show');
         }, 10);
-    });
-
+    }
 
     $('.close').on('click', function () {
         closeModal();
@@ -47,41 +49,48 @@
     function generateExistingForm(formType) {
         $.ajax({
             type: "GET",
-            url: "",
+            url: "{% url 'map:prefabs_view' %}",
             data: {
                 name: formType,
                 type: "modal_get"
             },
             success(response) {
                 console.log(response);
-                if (response.error == true) {
-                    // alert("Something wrong with database for this prefab");
-                    // location.reload();
+                if (response.error != null) {
+                    alert(response.error);
+                    return false;
                 }
-
-
-
+                
+                formHtml = createExistingForm(response);
+                addHtmlToModal(formHtml);
             },
             error(response) {
                 console.log(response);
-                // alert("Something wrong with database for this prefab");
-                // location.reload();
+                alert("Something wrong with database for this prefab");
+                location.reload();
             }
         });
     }
 
-    function generateCreateForm() {
+    function createExistingForm(response){
+        var data = response.prefab[0];
         return `
-            <h2 class="text-white text-center">Create Conveyor Prefab</h2>
+            <h2 class="text-white text-center">Conveyor Prefab `+ data.name +`</h2>
             <form class="forms-sample" id="myForm">
                 {% csrf_token %}
-                `+ form_helper("text", "name", "Name", "") + `
-                `+ form_helper("number", "length", "Length", "") + `
-                `+ form_helper("number", "width", "Width", "") + `
-                `+ form_helper("number", "height", "Height", "") + `
-                `+ form_helper("file", "image", "Image", "") + `
                 <div class="form-group row d-flex justify-content-between">
-                    <div class="col-sm-12 col-md-12 btn btn-primary" onclick="submit_form()">
+                `+ form_helper("text", "name", "Name", data.name) + `
+                `+ form_helper("number", "length", "Length", data.length, "step='0.01'") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between">
+                `+ form_helper("number", "width", "Width", data.width, "step='0.01'") + `
+                `+ form_helper("number", "height", "Height", data.height, "step='0.01'") + `
+                </div>
+                <div class="form-group row d-flex">
+                `+ form_helper("file", "image", "Image", "") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between">
+                    <div class="col-sm-12 col-md-12 btn btn-primary" onclick="submit_form('`+data.name+`')">
                         Submit
                     </div>
                 </div>
@@ -89,7 +98,32 @@
         `;
     }
 
-    function submit_form() {
+    function generateCreateForm() {
+        return `
+            <h2 class="text-white text-center">Create Conveyor Prefab</h2>
+            <form class="forms-sample" id="myForm">
+                {% csrf_token %}
+                <div class="form-group row d-flex justify-content-between">
+                `+ form_helper("text", "name", "Name", "", "") + `
+                `+ form_helper("number", "length", "Length", "0", "step='0.01'") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between">
+                `+ form_helper("number", "width", "Width", "0", "step='0.01'") + `
+                `+ form_helper("number", "height", "Height", "0", "step='0.01'") + `
+                </div>
+                <div class="form-group row d-flex">
+                `+ form_helper("file", "image", "Image", "", "") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between">
+                    <div class="col-sm-12 col-md-12 btn btn-primary" onclick="submit_form('create')">
+                        Submit
+                    </div>
+                </div>
+            </form >
+        `;
+    }
+
+    function submit_form(original_name) {
         console.log("SUBMIT CLICKED");
         var formData = new FormData();
         var image = $("#image")[0].files[0];
@@ -101,6 +135,7 @@
         formData.append("length", $("#length").val());
         formData.append("width", $("#width").val());
         formData.append("height", $("#height").val());
+        formData.append("original_name", original_name);
         console.log(formData.entries());
         $.ajax({
             type: "POST",
@@ -117,7 +152,6 @@
                     alert(response.error);
                 }
                 else {
-                    alert(response.success);
                     location.reload();
                 }
             },

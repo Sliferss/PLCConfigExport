@@ -16,7 +16,7 @@
     margin: auto;
     padding: 20px;
     width: 80%;
-    max-width: 25vw;
+    max-width: 40vw;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     animation: modal-show 0.3s ease-out forwards;
