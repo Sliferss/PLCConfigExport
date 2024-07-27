@@ -1,7 +1,8 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
-from map.views import Index, PrefabsView
+from map.views import Index
+from map.views_collection.PrefabsView import PrefabsView
 
 app_name = "map"
 
