@@ -3,7 +3,7 @@ from django.conf.urls.static import static
 from django.urls import path
 from map.views import Index
 from map.views_collection.PrefabsView import PrefabsView
-from map.views_collection.MapCollectionView import MapCollectionView
+from map.views_collection.MapCollectionView import MapCollectionView, GridView
 
 app_name = "map"
 
@@ -11,6 +11,7 @@ urlpatterns = [
     path("", Index.as_view(), name="index"),
     path("prefabs/", PrefabsView.as_view(), name="prefabs_view"),
     path("map_collection/", MapCollectionView.as_view(), name="map_collection"),
+    path("grid_view/", GridView.as_view(), name="grid_view"),
 ]
 
 if settings.DEBUG:

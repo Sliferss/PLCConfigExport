@@ -6,7 +6,7 @@
 
     var filterButton = $("#filter_button");
 
-    $("#filter_button").on("click", function(){
+    $("#filter_button").on("click", function () {
         var name = $("#filter_name").val();
         var url = "../map_collection?filter_name=" + name;
         window.location.href = url;
@@ -14,17 +14,18 @@
 
     $('.open-modal').on('click', function () {
         var formType = $(this).data('form-type');
-        console.log("form-type: "  + formType);
+        console.log("form-type: " + formType);
         if (formType == "create") {
             var formHtml = generateCreateForm();
             addHtmlToModal(formHtml);
         }
         else {
-            generateExistingForm(formType);
+            var url = "../grid_view?filter_name=" + formType;
+            window.location.href = url;
         }
     });
 
-    function addHtmlToModal(formHtml){
+    function addHtmlToModal(formHtml) {
         modalBody.html(formHtml);
         modal.show();
         setTimeout(function () {

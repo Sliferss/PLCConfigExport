@@ -9,6 +9,21 @@ import os
 from django.conf import settings
 
 
+class GridView(View):
+    template_name = "grid_view.html"
+    queryset = None
+
+    def get(self, request, *args, **kwargs):
+        context = {}
+        if not is_ajax(request):
+            name = request.GET.get("filter_name")
+            map_setup = MapSetup.objects.filter(name=map).first()
+            context["queryset"] = self.queryset
+            context["map_setup"] = map_setup
+            context["filter_name"] = name
+            return render(request, self.template_name, context)
+
+
 class MapCollectionView(View):
     template_name = "map_collection_view.html"
     queryset = None

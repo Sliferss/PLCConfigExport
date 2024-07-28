@@ -1,0 +1,51 @@
+{% extends 'base.html' %} {% load static %}
+
+{% block body %}
+<link rel="stylesheet" href="{% static '/assets/css/modal.css' %}">
+
+<div class="row">
+    <div class="col-sm-12 col-md-2">
+        <h3>BACK BUTTON PLACEHOLDER</h3>
+        <h3>FILTER PLACEHOLDER</h3>
+        <h3>PREFABS PLACEHOLDER</h3>
+    </div>
+    <div class="col-sm-12 col-md-10" id="grid_map">
+        <div class="row no-gutters">
+            <div class="col">
+                <div class="square">
+                    <div class="square-content rounded"></div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="square">
+                    <div class="square-content rounded"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $("#sidebar").css("display", "none");
+    $(".container-fluid").css("width", "100%");
+</script>
+<style>
+    .square {
+        border: 1px solid black;
+        border-radius: 20px;
+        padding-bottom: 100%;
+        position: relative;
+    }
+
+    .square-content {
+        background-color: aqua;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+{% endblock %}

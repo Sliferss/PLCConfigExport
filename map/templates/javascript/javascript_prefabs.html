@@ -6,7 +6,7 @@
 
     var filterButton = $("#filter_button");
 
-    $("#filter_button").on("click", function(){
+    $("#filter_button").on("click", function () {
         var name = $("#filter_name").val();
         var url = "../prefabs?filter_name=" + name;
         window.location.href = url;
@@ -14,7 +14,7 @@
 
     $('.open-modal').on('click', function () {
         var formType = $(this).data('form-type');
-        console.log("form-type: "  + formType);
+        console.log("form-type: " + formType);
         if (formType == "create") {
             var formHtml = generateCreateForm();
             addHtmlToModal(formHtml);
@@ -24,7 +24,7 @@
         }
     });
 
-    function addHtmlToModal(formHtml){
+    function addHtmlToModal(formHtml) {
         modalBody.html(formHtml);
         modal.show();
         setTimeout(function () {
@@ -68,7 +68,7 @@
                     alert(response.error);
                     return false;
                 }
-                
+
                 formHtml = createExistingForm(response);
                 addHtmlToModal(formHtml);
             },
@@ -80,10 +80,10 @@
         });
     }
 
-    function createExistingForm(response){
+    function createExistingForm(response) {
         var data = response.prefab[0];
         return `
-            <h2 class="text-white text-center">Conveyor Prefab `+ data.name +`</h2>
+            <h2 class="text-white text-center">Conveyor Prefab `+ data.name + `</h2>
             <form class="forms-sample" id="myForm">
                 {% csrf_token %}
                 <div class="form-group row d-flex justify-content-between">
@@ -98,7 +98,7 @@
                 `+ form_helper_6("file", "image", "Image", "") + `
                 </div>
                 <div class="form-group row d-flex justify-content-between">
-                    <div class="col-sm-12 col-md-12 btn btn-primary" onclick="submit_form('`+data.name+`')">
+                    <div class="col-sm-12 col-md-12 btn btn-primary" onclick="submit_form('`+ data.name + `')">
                         Submit
                     </div>
                 </div>
