@@ -8,7 +8,7 @@
 
     $("#filter_button").on("click", function(){
         var name = $("#filter_name").val();
-        var url = "../prefabs?filter_name=" + name;
+        var url = "../map_collection?filter_name=" + name;
         window.location.href = url;
     });
 
@@ -54,70 +54,17 @@
         }, 50);
     }
 
-    function generateExistingForm(formType) {
-        $.ajax({
-            type: "GET",
-            url: "{% url 'map:prefabs_view' %}",
-            data: {
-                name: formType,
-                type: "modal_get"
-            },
-            success(response) {
-                console.log(response);
-                if (response.error != null) {
-                    alert(response.error);
-                    return false;
-                }
-                
-                formHtml = createExistingForm(response);
-                addHtmlToModal(formHtml);
-            },
-            error(response) {
-                console.log(response);
-                alert("Something wrong with database for this prefab");
-                location.reload();
-            }
-        });
-    }
-
-    function createExistingForm(response){
-        var data = response.prefab[0];
-        return `
-            <h2 class="text-white text-center">Conveyor Prefab `+ data.name +`</h2>
-            <form class="forms-sample" id="myForm">
-                {% csrf_token %}
-                <div class="form-group row d-flex justify-content-between">
-                `+ form_helper_6("text", "name", "Name", data.name) + `
-                `+ form_helper_6("number", "length", "Length", data.length, "step='0.01'") + `
-                </div>
-                <div class="form-group row d-flex justify-content-between">
-                `+ form_helper_6("number", "width", "Width", data.width, "step='0.01'") + `
-                `+ form_helper_6("number", "height", "Height", data.height, "step='0.01'") + `
-                </div>
-                <div class="form-group row d-flex">
-                `+ form_helper_6("file", "image", "Image", "") + `
-                </div>
-                <div class="form-group row d-flex justify-content-between">
-                    <div class="col-sm-12 col-md-12 btn btn-primary" onclick="submit_form('`+data.name+`')">
-                        Submit
-                    </div>
-                </div>
-            </form >
-        `;
-    }
-
     function generateCreateForm() {
         return `
             <h2 class="text-white text-center">Create Conveyor Prefab</h2>
             <form class="forms-sample" id="myForm">
                 {% csrf_token %}
                 <div class="form-group row d-flex justify-content-between">
-                `+ form_helper_6("text", "name", "Name", "", "") + `
-                `+ form_helper_6("number", "length", "Length", "0", "step='0.01'") + `
+                `+ form_helper_12("text", "name", "Name", "", "") + `
                 </div>
                 <div class="form-group row d-flex justify-content-between">
-                `+ form_helper_6("number", "width", "Width", "0", "step='0.01'") + `
-                `+ form_helper_6("number", "height", "Height", "0", "step='0.01'") + `
+                `+ form_helper_6("number", "width", "Grid Width", "24", "") + `
+                `+ form_helper_6("number", "height", "Grid Height", "24", "") + `
                 </div>
                 <div class="form-group row d-flex">
                 `+ form_helper_6("file", "image", "Image", "", "") + `
@@ -140,13 +87,12 @@
         formData.append('image', image);
         formData.append('name', name);
         formData.append("type", "create");
-        formData.append("length", $("#length").val());
         formData.append("width", $("#width").val());
         formData.append("height", $("#height").val());
         formData.append("original_name", original_name);
         $.ajax({
             type: "POST",
-            url: "{% url 'map:prefabs_view' %}",
+            url: "{% url 'map:map_collection' %}",
             data: formData,
             contentType: false,
             processData: false,

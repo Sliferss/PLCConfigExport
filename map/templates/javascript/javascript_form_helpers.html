@@ -1,11 +1,44 @@
 <script>
 
-    function form_helper(type, id, label, value, attr) {
+    function form_helper_6(type, id, label, value, attr) {
         form_string = `
             <div class="col-sm-2 col-form-label">
                 <label for="name" style="font-size:0.75vw; width:100%;">`+ label + `:</label>
             </div>
             <div class="col-sm-4" style="font-size:0.75vw; width:100%;">
+                <input style="width:100%;" type="`+ type + `" id="` + id + `" name="` + id + `" value="` + value + `" ` + attr + ` >
+            </div>`;
+        return form_string
+    }
+
+    function form_helper_12(type, id, label, value, attr) {
+        form_string = `
+            <div class="col-sm-2 col-form-label">
+                <label for="name" style="font-size:0.75vw; width:100%;">`+ label + `:</label>
+            </div>
+            <div class="col-sm-10" style="font-size:0.75vw;">
+                <input style="width:100%;" type="`+ type + `" id="` + id + `" name="` + id + `" value="` + value + `" ` + attr + ` >
+            </div>`;
+        return form_string
+    }
+
+    function form_helper_4(type, id, label, value, attr) {
+        form_string = `
+            <div class="col-sm-2 col-form-label">
+                <label for="name" style="font-size:0.75vw; width:100%;">`+ label + `:</label>
+            </div>
+            <div class="col-sm-2" style="font-size:0.75vw; width:100%;">
+                <input style="width:100%;" type="`+ type + `" id="` + id + `" name="` + id + `" value="` + value + `" ` + attr + ` >
+            </div>`;
+        return form_string
+    }
+
+    function form_helper_3(type, id, label, value, attr) {
+        form_string = `
+            <div class="col-sm-1 col-form-label">
+                <label for="name" style="font-size:0.65vw; width:100%;">`+ label + `:</label>
+            </div>
+            <div class="col-sm-2" style="font-size:0.65vw; width:100%;">
                 <input type="`+ type + `" id="` + id + `" name="` + id + `" value="` + value + `" ` + attr + ` >
             </div>`;
         return form_string

@@ -33,6 +33,10 @@ class PrefabsView(View):
         context = {}
         self.queryset = PrefabsConveyor.objects.all()
         if not is_ajax(request):
+            name = request.GET.get("filter_name")
+            if name:
+                self.queryset = self.queryset.filter(name__icontains=name)
+                context["filter_name"] = name
             context["prefabs"] = self.queryset
             return render(request, self.template_name, context)
 

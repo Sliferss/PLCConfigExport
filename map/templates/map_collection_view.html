@@ -9,10 +9,10 @@
             <div class="col-12 grid-margin stretch-card rounded">
                 <div class="card d-flex justify-content-center">
                     <div class="card-body">
-                        <div class="text-center" style="font-size: 1vw;">Filter Prefabs</div>
+                        <div class="text-center" style="font-size: 1vw;">Filter maps</div>
                         <br>
                         <div class="form-group">
-                            <label for="filter_name">Prefab Name:</label>
+                            <label for="filter_name">Map Name:</label>
                             <input type="text" class="form-control text-white" id="filter_name" style="width: 100%;" value="{{filter_name}}">
                         </div>
                         <div class="btn btn-primary text-center" style="width: 100%;" id="filter_button">Submit</div>
@@ -27,13 +27,13 @@
                 style="max-height: 20vh; cursor: pointer;" data-form-type="create">
                 <div class="create pb-3" style="font-size: 14vw;">+</div>
             </div>
-            {% for prefab in prefabs %}
+            {% for map in maps %}
             <div class="col-sm-12 col-md-2 grid-margin stretch-card rounded d-flex justify-content-center open-modal"
-                style="max-height: 20vh; height: 20vh; cursor: pointer;" data-form-type="{{prefab.name}}">
+                style="max-height: 20vh; height: 20vh; cursor: pointer;" data-form-type="{{map.name}}">
                 <div class="card d-flex justify-content-center align-items-center">
-                    <div class="card-title text-center" style="font-size: 1vw;">{{prefab.name}}</div>
-                    {% if prefab.image %}
-                    <img src="{{ prefab.image.url }}" alt="{{ prefab.image }}" class="pb-3"
+                    <div class="card-title text-center" style="font-size: 1vw;">{{map.name}}</div>
+                    {% if map.image %}
+                    <img src="{{ map.image.url }}" alt="{{ map.image }}" class="pb-3"
                         style="object-fit: cover; height: 75%; width: 75%;">
                     {% else %}
                     <p style="font-size: 1vw;">No image available</p>
@@ -55,7 +55,7 @@
 <script>
 
     $(document).ready(function () {
-        $('.prefab_view').addClass('active');
+        $('.map_collection_view').addClass('active');
     });
 
 </script>
@@ -71,6 +71,6 @@
 </style>
 
 {% include 'javascript/javascript_form_helpers.html' %}
-{% include 'javascript/javascript_prefabs.html' %}
+{% include 'javascript/javascript_maps.html' %}
 
 {% endblock %}

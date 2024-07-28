@@ -6,7 +6,7 @@ def is_ajax(request):
 
 
 class Index(View):
-    template_name = "map_index.html"
+    template_name = "index.html"
 
     def get(self, request, *args, **kwargs):
         context = {}

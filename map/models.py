@@ -19,6 +19,8 @@ class MapSetup(models.Model):
     grid_width = models.IntegerField(blank=True, null=True, default=24)
     grid_height = models.IntegerField(blank=True, null=True, default=24)
 
+    image = models.ImageField(upload_to='map_images/', blank=True, null=True)
+
     def __str__(self):
         return str(self.timestamp) + ": " + self.name + " GridWidth: " + str(self.grid_width) + " GridHeight: " + str(self.grid_height)
 
