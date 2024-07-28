@@ -16,12 +16,24 @@ class GridView(View):
     def get(self, request, *args, **kwargs):
         context = {}
         if not is_ajax(request):
-            name = request.GET.get("filter_name")
-            map_setup = MapSetup.objects.filter(name=map).first()
-            context["queryset"] = self.queryset
-            context["map_setup"] = map_setup
-            context["filter_name"] = name
+            context = self.initiate_grid(request, context)
             return render(request, self.template_name, context)
+        
+        prefabs = PrefabsConveyor.objects.all()
+        prefab_filter = request.GET.get("prefab_filter")
+        if prefab_filter:
+            prefabs = prefabs.filter(name__icontains=prefab_filter)
+        context["prefab_filter"] = prefab_filter
+        context["prefabs"] = list(prefabs.values())
+        return JsonResponse(context)
+
+    def initiate_grid(self, request, context):
+        name = request.GET.get("filter_name")
+        map_setup = MapSetup.objects.filter(name=name).first()
+        context["grid_width"] = map_setup.grid_width
+        context["grid_height"] = map_setup.grid_height
+        context["filter_name"] = name
+        return context
 
 
 class MapCollectionView(View):

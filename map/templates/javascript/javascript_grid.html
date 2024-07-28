@@ -1,0 +1,105 @@
+<script>
+
+    var grid_width = parseInt("{{grid_width}}");
+    var grid_height = parseInt("{{grid_height}}");
+    var filter_name = "{{filter_name}}";
+
+    function initiate_grid() {
+        var grid_string = "";
+
+        for (let height_loop = 0; height_loop < grid_height; height_loop++) {
+            grid_string += `<div class="row no-gutters">`;
+            for (let width_loop = 0; width_loop < grid_width; width_loop++) {
+                grid_string += `<div class="col">
+                                <div class="square">
+                                    <div class="square-content rounded" id="h`+ height_loop + `w` + width_loop + `">
+                                    <div class="text-center text-white" style="font-size: 0.45vw;">H`+ height_loop + `W` + width_loop + `</div>
+                                    </div>
+                                </div>
+                            </div>`;
+            }
+            grid_string += "</div>";
+        }
+        $("#grid_map").empty();
+        $("#grid_map").append(grid_string);
+    }
+
+    function filter_prefabs_list() {
+        $.ajax({
+            type: "GET",
+            url: "{% url 'map:grid_view' %}",
+            data: {
+                type: "filter",
+                filter_name: $("#filter_name").val()
+            },
+            success(response) {
+                console.log(response);
+                draw_prefabs(response);
+            },
+            error(response) {
+                console.log(response);
+            }
+        });
+    }
+
+    function draw_prefabs(response) {
+        var prefabs_list = response.prefabs;
+        var width = 3;
+
+        var prefabs_string = "";
+        var prefabs_name_string = "";
+        var loop_count = 0;
+        for (var key in prefabs_list) {
+            if (loop_count == 0) {
+                prefabs_string += `<div class="row no-gutters">`;
+                prefabs_string += `<div class="col">
+                                    <div class="square">
+                                        <div class="square-content rounded" id="`+ prefabs_list[key].name + `">
+                                            <img src="/media/`+ prefabs_list[key].image + `" alt=""
+                                            style="object-fit: cover; height: 85%; width: 85%;">
+                                        </div>
+                                    </div>
+                                </div>`;
+                prefabs_name_string += `<div class="row no-gutters">`;
+                prefabs_name_string += `<div class="col-sm-12 col-md-4 black_border py-2 d-flex justify-content-center align-items-center" style="background-color: #191c24;">
+                                            <div class="text-white text-center" style="font-size: 0.5vw;">`+ prefabs_list[key].name + `</div>
+                                        </div>`;
+            }
+            else if (loop_count < width) {
+                prefabs_string += `<div class="col">
+                                        <div class="square">
+                                            <div class="square-content rounded" id="`+ prefabs_list[key].name + `">
+                                                <img src="/media/`+ prefabs_list[key].image + `" alt=""
+                                                style="object-fit: cover; height: 85%; width: 85%;">
+                                            </div>
+                                        </div>
+                                    </div>`;
+                prefabs_name_string += `<div class="col-sm-12 col-md-4 black_border py-2 d-flex justify-content-center align-items-center" style="background-color: #191c24;">
+                                            <div class="text-white text-center" style="font-size: 0.5vw;">`+ prefabs_list[key].name + `</div>
+                                        </div>`;
+            }
+            loop_count++;
+            if (loop_count == width) {
+                prefabs_string += "</div>";
+                prefabs_name_string += "</div>";
+                prefabs_string += prefabs_name_string;
+                prefabs_name_string = "";
+                loop_count = 0;
+            }
+            else if (key == prefabs_list.length - 1) {
+                prefabs_string += "</div>";
+                prefabs_name_string += "</div>";
+                prefabs_string += prefabs_name_string;
+                prefabs_name_string = "";
+                loop_count = 0;
+            }
+        }
+        $("#prefab_list").empty();
+        $("#prefab_list").append(prefabs_string);
+    }
+
+
+    initiate_grid();
+    filter_prefabs_list();
+
+</script>
