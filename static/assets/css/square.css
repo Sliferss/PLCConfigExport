@@ -22,6 +22,14 @@
     justify-content: center;
 }
 
+.draggable-box {
+    position: absolute;
+    height: 5vh;
+    width: 5vh;
+    background-size: cover;
+    pointer-events: none;
+}
+
 .scroll-container {
     overflow-y: scroll;
     background: black;

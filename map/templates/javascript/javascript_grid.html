@@ -11,8 +11,8 @@
             grid_string += `<div class="row no-gutters">`;
             for (let width_loop = 0; width_loop < grid_width; width_loop++) {
                 grid_string += `<div class="col">
-                                <div class="square">
-                                    <div class="square-content rounded" id="h`+ height_loop + `w` + width_loop + `">
+                                <div class="square grid_square" id="h`+ height_loop + `w` + width_loop + `">
+                                    <div class="square-content rounded">
                                     <div class="text-center text-white" style="font-size: 0.45vw;">H`+ height_loop + `W` + width_loop + `</div>
                                     </div>
                                 </div>
@@ -49,13 +49,20 @@
         var prefabs_string = "";
         var prefabs_name_string = "";
         var loop_count = 0;
+        var tempimage = "";
         for (var key in prefabs_list) {
+            if (prefabs_list[key].image == "") {
+                tempimage = "defaultIMG.png";
+            }
+            else {
+                tempimage = prefabs_list[key].image;
+            }
             if (loop_count == 0) {
                 prefabs_string += `<div class="row no-gutters">`;
                 prefabs_string += `<div class="col">
-                                    <div class="square">
-                                        <div class="square-content rounded" id="`+ prefabs_list[key].name + `">
-                                            <img src="/media/`+ prefabs_list[key].image + `" alt=""
+                                    <div class="square" style="cursor: pointer;">
+                                        <div class="square-content rounded draggable" id="`+ prefabs_list[key].name + `">
+                                            <img src="/media/`+ tempimage + `" alt=""
                                             style="object-fit: cover; height: 85%; width: 85%;">
                                         </div>
                                     </div>
@@ -67,9 +74,9 @@
             }
             else if (loop_count < width) {
                 prefabs_string += `<div class="col">
-                                        <div class="square">
-                                            <div class="square-content rounded" id="`+ prefabs_list[key].name + `">
-                                                <img src="/media/`+ prefabs_list[key].image + `" alt=""
+                                        <div class="square" style="cursor: pointer;">
+                                            <div class="square-content rounded draggable" id="`+ prefabs_list[key].name + `">
+                                                <img src="/media/`+ tempimage + `" alt=""
                                                 style="object-fit: cover; height: 85%; width: 85%;">
                                             </div>
                                         </div>
@@ -87,16 +94,82 @@
                 loop_count = 0;
             }
             else if (key == prefabs_list.length - 1) {
+                for (loop_count; loop_count < width; loop_count++) {
+                    prefabs_string += `<div class="col">
+                                        <div class="square" style="cursor: pointer;">
+                                            <div class="square-content rounded" id="none">
+                                            </div>
+                                        </div>
+                                    </div>`;
+                    prefabs_name_string += `<div class="col-sm-12 col-md-4 black_border py-2 d-flex justify-content-center align-items-center" style="background-color: #191c24;">
+                                            <div class="text-white text-center" style="font-size: 0.5vw;">None</div>
+                                        </div>`;
+                }
                 prefabs_string += "</div>";
                 prefabs_name_string += "</div>";
                 prefabs_string += prefabs_name_string;
                 prefabs_name_string = "";
-                loop_count = 0;
             }
         }
         $("#prefab_list").empty();
         $("#prefab_list").append(prefabs_string);
     }
+
+
+    var dragging = false;
+    var elementId = null;
+    var imageUrl = null;
+    var gridElementId = null;
+
+    $(document).ready(function () {
+        $(".draggable").on("click", function (event) {
+            if (!dragging) {
+                elementId = $(this).attr("id");
+                imageUrl = $(this).find("img").attr("src");
+
+                console.log("Element ID: " + elementId);
+                console.log("Image URL: " + imageUrl);
+
+                dragging = true;
+                $(".draggingimage").attr("src", imageUrl);
+                $(".draggingimage").css({
+                    display: "inline",
+                    left: event.pageX - $(".draggingimage").width() / 2,
+                    top: event.pageY - $(".draggingimage").height() / 2
+                });
+            } else {
+                dragging = false;
+                $(".draggingimage").css("display", "none");
+            }
+        });
+
+
+        $(".grid_square").on("click", function (event) {
+            if (!dragging) {
+                console.log("Cicked: " + $(this).attr("id"));
+            } else {
+                dragging = false;
+                gridElementId = $(this).attr("id");
+                console.log("Cicked: " + $(this).attr("id") + " from: " + elementId);
+                $(".draggingimage").css("display", "none");
+                elementId = null;
+                gridElementId = null;
+            }
+        });
+
+
+        $(document).mousemove(function (e) {
+            if (dragging) {
+                var imgWidth = $(".draggingimage").width();
+                var imgHeight = $(".draggingimage").height();
+                $(".draggingimage").css({
+                    left: e.pageX - imgWidth / 2,
+                    top: e.pageY - imgHeight / 2
+                });
+            }
+        });
+    });
+
 
 
     initiate_grid();
