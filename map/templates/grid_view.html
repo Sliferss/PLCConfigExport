@@ -49,11 +49,21 @@
     </div>
     <img class="draggingimage" src="" alt="HTML5 Icon" style="display: none; position:absolute; height: 5vh; width: auto; pointer-events: none;">
 </div>
+
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <div id="modal-body"></div>
+    </div>
+</div>
+
 <script>
     $("#sidebar").css("display", "none");
     $(".container-fluid").css("width", "100%");
 </script>
 <script src="{% static '/assets/js/jquery-ui.min.js' %}"></script>
+{% include 'javascript/helpers/javascript_form_helpers.html' %}
+{% include 'javascript/helpers/javascript_modal_helpers.html' %}
 {% include 'javascript/javascript_grid.html' %}
 
 {% endblock %}

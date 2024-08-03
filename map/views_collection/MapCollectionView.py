@@ -15,17 +15,34 @@ class GridView(View):
 
     def get(self, request, *args, **kwargs):
         context = {}
+        if request.GET.get("type") == "filter":
+            context = self.populate_prefabs(request, context)
+            return JsonResponse(context)
+        if request.GET.get("type") == "prefab_get":
+            context = self.get_prefab(request, context)
+            return JsonResponse(context)
         if not is_ajax(request):
             context = self.initiate_grid(request, context)
             return render(request, self.template_name, context)
-        
+
+    def get_prefab(self, request, context):
+        print(request.GET.get("prefab"))
+        prefab = PrefabsConveyor.objects.filter(name=request.GET.get("prefab"))
+        context["success"] = True
+        if not prefab:
+            context["success"] = False
+            context["error"] = "Prefab no longer in database!"
+        context["prefab"] = list(prefab.values())
+        return context
+
+    def populate_prefabs(self, request, context):
         prefabs = PrefabsConveyor.objects.all()
         prefab_filter = request.GET.get("prefab_filter")
         if prefab_filter:
             prefabs = prefabs.filter(name__icontains=prefab_filter)
         context["prefab_filter"] = prefab_filter
         context["prefabs"] = list(prefabs.values())
-        return JsonResponse(context)
+        return context
 
     def initiate_grid(self, request, context):
         name = request.GET.get("filter_name")
