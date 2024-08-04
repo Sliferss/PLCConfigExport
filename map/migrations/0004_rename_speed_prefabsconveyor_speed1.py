@@ -4,15 +4,14 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('map', '0003_mapsetup_image'),
+        ("map", "0003_mapsetup_image"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='prefabsconveyor',
-            old_name='speed',
-            new_name='speed1',
+            model_name="prefabsconveyor",
+            old_name="speed",
+            new_name="speed1",
         ),
     ]

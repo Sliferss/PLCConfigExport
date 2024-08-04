@@ -4,7 +4,6 @@ from django.views.generic import View
 from map.models import PrefabsConveyor
 from map.views import is_ajax
 from django.utils.crypto import get_random_string
-from map.models import PrefabsConveyor
 import os
 from django.conf import settings
 
@@ -16,13 +15,13 @@ class PrefabsView(View):
         context = {}
         context["success"] = True
         context["error"] = ""
-        name = request.POST.get('name')
+        name = request.POST.get("name")
         if not name:
             context["success"] = False
             context["error"] = "Missing Name!"
             return JsonResponse(context)
-        type = request.POST.get('type')
-        self.image = request.FILES.get('image')
+        type = request.POST.get("type")
+        self.image = request.FILES.get("image")
         if type == "create":
             context = self.handle_create(request, context)
             return JsonResponse(context)
@@ -62,7 +61,7 @@ class PrefabsView(View):
 
     def handle_update(self, request, context):
         original_name = request.POST.get("original_name")
-        name = request.POST.get('name')
+        name = request.POST.get("name")
         prefab_obj = PrefabsConveyor.objects.filter(name=name).first()
         if not prefab_obj:
             prefab_obj = PrefabsConveyor.objects.create(name=name)
@@ -76,8 +75,7 @@ class PrefabsView(View):
         return context
 
     def handle_create(self, request, context):
-        original_name = request.POST.get("original_name")
-        name = request.POST.get('name')
+        name = request.POST.get("name")
         if PrefabsConveyor.objects.filter(name=name):
             context["success"] = False
             context["error"] = "Name Already Exists!"
@@ -125,7 +123,7 @@ class PrefabsView(View):
             unique_id = get_random_string(6)
             image_name = f"{base}_{unique_id}{ext}"
             image_path = os.path.join(settings.MEDIA_ROOT, image_name)
-        with open(image_path, 'wb+') as destination:
+        with open(image_path, "wb+") as destination:
             for chunk in self.image.chunks():
                 destination.write(chunk)
         return image_path

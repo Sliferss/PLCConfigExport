@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class PrefabsConveyor(models.Model):
     timestamp = models.DateTimeField(auto_now=True, null=True)
     name = models.CharField(primary_key=True, max_length=255)
@@ -28,16 +29,26 @@ class PrefabsConveyor(models.Model):
     def __str__(self):
         return str(self.timestamp) + ": " + self.name
 
+
 class MapSetup(models.Model):
     timestamp = models.DateTimeField(auto_now=True, null=True)
     name = models.CharField(primary_key=True, max_length=255)
     grid_width = models.IntegerField(blank=True, null=True, default=24)
     grid_height = models.IntegerField(blank=True, null=True, default=24)
 
-    image = models.ImageField(upload_to='map_images/', blank=True, null=True)
+    image = models.ImageField(upload_to="map_images/", blank=True, null=True)
 
     def __str__(self):
-        return str(self.timestamp) + ": " + self.name + " GridWidth: " + str(self.grid_width) + " GridHeight: " + str(self.grid_height)
+        return (
+            str(self.timestamp)
+            + ": "
+            + self.name
+            + " GridWidth: "
+            + str(self.grid_width)
+            + " GridHeight: "
+            + str(self.grid_height)
+        )
+
 
 class GridParts(models.Model):
     timestamp = models.DateTimeField(auto_now=True, null=True)

@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.views.generic import View
 
+
 def is_ajax(request):
     return request.headers.get("x-requested-with") == "XMLHttpRequest"
 

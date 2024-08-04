@@ -513,7 +513,7 @@
                 var temp_a = document.createElement('a');
                 var temp_url = window.URL.createObjectURL(new Blob([response], { type: 'text/csv' }));
                 temp_a.href = temp_url;
-                temp_a.download = 'filtered_data.csv';
+                temp_a.download = 'plc_export_' + filter_name + '.csv';
                 document.body.append(temp_a);
                 temp_a.click();
                 temp_a.remove();
