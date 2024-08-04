@@ -5,9 +5,9 @@
     var filter_name = "{{filter_name}}";
 
     var dragging = false;
-    var elementId = null;
+    var element_id = null;
     var imageUrl = null;
-    var gridElementId = null;
+    var grid_element_id = null;
 
     var modal = $('#modal');
     var modalContent = $('.modal-content');
@@ -22,7 +22,7 @@
                 grid_string += `<div class="col">
                                 <div class="square grid_square" id="H`+ height_loop + `W` + width_loop + `">
                                     <div class="square-content rounded">
-                                    <div class="text-center text-white" style="font-size: 0.45vw;">H`+ height_loop + `W` + width_loop + `</div>
+                                    <div class="text-center text-white" style="font-size: 0.45vw;" id="H`+ height_loop + `W` + width_loop + `content"></div>
                                     </div>
                                 </div>
                             </div>`;
@@ -31,7 +31,42 @@
         }
         $("#grid_map").empty();
         $("#grid_map").append(grid_string);
+        initiate_grid_images();
     }
+
+    function initiate_grid_images() {
+        $.ajax({
+            type: "GET",
+            url: "{% url 'map:grid_view' %}",
+            data: {
+                type: "grid_images",
+                map: filter_name
+            },
+            success(response) {
+                console.log(response.grid_parts);
+                for (var key in response.grid_parts) {
+                    var temp_id = $("#H" + response.grid_parts[key].position_y + "W" + response.grid_parts[key].position_x + "content");
+                    if (temp_id.find("img").length == 0) {
+                        var tempimage = response.grid_parts[key].image
+                        if (tempimage == null || tempimage == "") {
+                            tempimage = "defaultIMG.png";
+                        }
+                        image_html = `<img src="/media/` + tempimage + `" alt=""
+                        style="object-fit: cover; height: 85%; width: 85%; cursor: pointer;">`;
+                        temp_id.empty();
+                        temp_id.append(image_html);
+                    }
+                }
+            },
+            error(response) {
+
+            }
+        });
+    }
+
+    $(document).on("click", "#filter_button", function (event) {
+        filter_prefabs_list();
+    });
 
     function filter_prefabs_list() {
         $.ajax({
@@ -60,11 +95,9 @@
         var loop_count = 0;
         var tempimage = "";
         for (var key in prefabs_list) {
-            if (prefabs_list[key].image == "") {
+            var tempimage = prefabs_list[key].image
+            if (tempimage == null || tempimage == "") {
                 tempimage = "defaultIMG.png";
-            }
-            else {
-                tempimage = prefabs_list[key].image;
             }
             if (loop_count == 0) {
                 prefabs_string += `<div class="row no-gutters">`;
@@ -129,10 +162,10 @@
 
     $(document).on("click", ".draggable", function (event) {
         if (!dragging) {
-            elementId = $(this).attr("id");
+            element_id = $(this).attr("id");
             imageUrl = $(this).find("img").attr("src");
 
-            console.log("Element ID: " + elementId);
+            console.log("Element ID: " + element_id);
             console.log("Image URL: " + imageUrl);
 
             dragging = true;
@@ -148,21 +181,20 @@
         }
     });
 
-
     $(document).on("click", ".grid_square", function (event) {
+        grid_element_id = $(this).attr("id");
         if (!dragging) {
             console.log("Cicked: " + $(this).attr("id"));
+            list_modal(grid_element_id);
         } else {
             dragging = false;
-            gridElementId = $(this).attr("id");
-            console.log("Cicked: " + $(this).attr("id") + " from: " + elementId);
+            console.log("Cicked: " + $(this).attr("id") + " from: " + element_id);
             $(".draggingimage").css("display", "none");
-            creat_modal(elementId, gridElementId);
-            elementId = null;
-            gridElementId = null;
+            creat_modal(element_id, grid_element_id);
+            element_id = null;
+            grid_element_id = null;
         }
     });
-
 
     $(document).mousemove(function (e) {
         if (dragging) {
@@ -174,6 +206,201 @@
             });
         }
     });
+
+    $(document).on("click", ".editform", function (event) {
+        grid_element_id = $(this).attr("id");
+        edit_form_modal(grid_element_id);
+    });
+
+    function edit_form_modal(grid_element_id) {
+        name = grid_element_id.replace("editform", "");
+        $.ajax({
+            type: "GET",
+            url: "{% url 'map:grid_view' %}",
+            data: {
+                type: "grid_part_edit_form",
+                name: name,
+                map: filter_name
+            },
+            success(response) {
+                console.log(response);
+                if (response.success == false) {
+                    alert(response.error);
+                    return
+                }
+                var html_for_form = edit_form_modal_html(response);
+                addHtmlToModal(html_for_form);
+            },
+            error(response) {
+                console.log(response);
+            }
+        });
+    }
+
+    function edit_form_modal_html(response) {
+        prefab = response.grid_parts[0];
+        return `
+            <h2 class="text-white text-center">Edit Grid Part</h2>
+            <form class="forms-sample" id="myForm">
+                {% csrf_token %}
+                <div class="form-group row d-flex justify-content-between">
+                `+ form_helper_12("text", "name", "Name", prefab.name, "readonly") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between">
+                `+ form_helper_6("number", "width", "Width", prefab.width, "") + `
+                `+ form_helper_6("number", "height", "Height", prefab.height, "") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between">
+                `+ form_helper_6("number", "pos_x", "Position X", prefab.position_x, "readonly") + `
+                `+ form_helper_6("number", "pos_y", "Position Y", prefab.position_y, "readonly") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between">
+                    <div class="col-sm-12 col-md-3 btn btn-primary px-2" onclick="submit_form('edit')">
+                        Submit
+                    </div>
+                    <div class="col-sm-12 col-md-3 btn btn-danger px-2" onclick="delete_form('` + prefab.name + `')">
+                        Delete
+                    </div>
+                    <div class="col-sm-12 col-md-3 btn btn-secondary px-2" onclick="closeModal()">
+                        Cancel
+                    </div>
+                </div>
+            </form >
+        `;
+    }
+
+    function delete_form(name) {
+        $.ajax({
+            type: "GET",
+            url: "{% url 'map:grid_view' %}",
+            data: {
+                type: "delete",
+                name: name,
+                map: filter_name
+            },
+            success(response) {
+                if (response.success) {
+                    var grid_part_id = $("#H" + $("#pos_y").val() + "W" + $("#pos_x").val() + "content");
+                    if (!response.addimage) {
+                        grid_part_id.empty();
+                        closeModal();
+                        return;
+                    }
+                    var tempimage = response.imageurl
+                    if (tempimage == null || tempimage == "") {
+                        tempimage = "defaultIMG.png";
+                    }
+                    image_html = `<img src="` + tempimage + `" alt=""
+                        style="object-fit: cover; height: 85%; width: 85%;  cursor: pointer;">`;
+                    grid_part_id.empty();
+                    grid_part_id.append(image_html)
+                    closeModal();
+                }
+                else {
+                    alert(response.error);
+                }
+            },
+            error(response) {
+                console.log(response);
+            }
+        });
+    }
+
+    function list_modal(grid_element_id) {
+        var grid_coords = extract_coords(grid_element_id);
+        $.ajax({
+            type: "GET",
+            url: "{% url 'map:grid_view' %}",
+            data: {
+                type: "grid_part_list",
+                map: filter_name,
+                pos_x: grid_coords.W,
+                pos_y: grid_coords.H
+            },
+            success(response) {
+                console.log(response);
+                var html_for_form = list_modal_html(response, grid_coords);
+                if(!html_for_form){
+                    return;
+                }
+                addHtmlToModal(html_for_form);
+            },
+            error(response) {
+                console.log(response);
+            }
+        });
+    }
+
+    function list_modal_html(response, grid_coords) {
+        var prefabs_list = response.grid_parts;
+        var width = 4;
+        var loop_count = 0;
+        var prefabs_string = "";
+        var tempimage = "";
+        var prefabs_name_string = "";
+        for (var key in prefabs_list) {
+            if (prefabs_list[key].image == "") {
+                tempimage = "defaultIMG.png";
+            }
+            else {
+                tempimage = prefabs_list[key].image;
+            }
+            if (loop_count == 0) {
+                prefabs_string += `<div class="row no-gutters">`;
+                prefabs_string += `<div class="col">
+                                    <div class="square black_border" style="cursor: pointer;">
+                                        <div class="square-content rounded editform" id="`+ prefabs_list[key].name + `editform">
+                                            <img src="/media/`+ tempimage + `" alt=""
+                                            style="object-fit: cover; height: 85%; width: 85%;">
+                                        </div>
+                                    </div>
+                                </div>`;
+                prefabs_name_string += `<div class="row pt-2 no-gutters">`;
+                prefabs_name_string += `<div class="col-sm-12 col-md-3 black_border py-2 d-flex justify-content-center align-items-center" style="background-color: #191c24;">
+                                            <div class="text-white text-center" style="font-size: 0.5vw;">`+ prefabs_list[key].name + `</div>
+                                        </div>`;
+            }
+            else if (loop_count < width) {
+                prefabs_string += `<div class="col">
+                                        <div class="square black_border" style="cursor: pointer;">
+                                            <div class="square-content rounded editform" id="`+ prefabs_list[key].name + `editform">
+                                                <img src="/media/`+ tempimage + `" alt=""
+                                                style="object-fit: cover; height: 85%; width: 85%;">
+                                            </div>
+                                        </div>
+                                    </div>`;
+                prefabs_name_string += `<div class="col-sm-12 col-md-3 black_border py-2 d-flex justify-content-center align-items-center" style="background-color: #191c24;">
+                                            <div class="text-white text-center" style="font-size: 0.5vw;">`+ prefabs_list[key].name + `</div>
+                                        </div>`;
+            }
+            loop_count++;
+            if (loop_count == width) {
+                prefabs_string += "</div>";
+                prefabs_name_string += "</div>";
+                prefabs_string += prefabs_name_string;
+                prefabs_name_string = "";
+                loop_count = 0;
+            }
+            else if (key == prefabs_list.length - 1) {
+                for (loop_count; loop_count < width; loop_count++) {
+                    prefabs_string += `<div class="col">
+                                        <div class="square black_border" style="cursor: pointer;">
+                                            <div class="square-content rounded" id="none">
+                                            </div>
+                                        </div>
+                                    </div>`;
+                    prefabs_name_string += `<div class="col-sm-12 col-md-3 black_border py-2 d-flex justify-content-center align-items-center" style="background-color: #191c24;">
+                                            <div class="text-white text-center" style="font-size: 0.5vw;">None</div>
+                                        </div>`;
+                }
+                prefabs_string += "</div>";
+                prefabs_name_string += "</div>";
+                prefabs_string += prefabs_name_string;
+                prefabs_name_string = "";
+            }
+        }
+        return prefabs_string;
+    }
 
     function creat_modal(prefab_id, grid_id) {
         $.ajax({
@@ -200,23 +427,24 @@
     }
 
     function extract_coords(str) {
-        let hMatch = str.match(/H(\d+)/);
-        let wMatch = str.match(/W(\d+)/);
+        let h_match = str.match(/H(\d+)/);
+        let w_match = str.match(/W(\d+)/);
 
-        let hNumber = hMatch ? hMatch[1] : null;
-        let wNumber = wMatch ? wMatch[1] : null;
+        let h_number = h_match ? h_match[1] : null;
+        let w_number = w_match ? w_match[1] : null;
 
-        return { H: hNumber, W: wNumber };
+        return { H: h_number, W: w_number };
     }
 
     function create_modal_form(response) {
         prefab = response.prefab[0];
         return `
-            <h2 class="text-white text-center">Create Conveyor Prefab</h2>
+            <h2 class="text-white text-center">Create Grid Part</h2>
             <form class="forms-sample" id="myForm">
                 {% csrf_token %}
                 <div class="form-group row d-flex justify-content-between">
-                `+ form_helper_12("text", "name", "Name", "", "") + `
+                `+ form_helper_6("text", "name", "Name", "", "") + `
+                `+ form_helper_6("text", "prefab", "Prefab", prefab.name, "readonly") + `
                 </div>
                 <div class="form-group row d-flex justify-content-between">
                 `+ form_helper_6("number", "width", "Width", prefab.width, "readonly") + `
@@ -233,6 +461,50 @@
                 </div>
             </form >
         `;
+    }
+
+    function submit_form(type) {
+        var formData = new FormData();
+        var name = $("#name").val();
+        var csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+        formData.append('name', name);
+        formData.append("type", type);
+        formData.append("prefab", $("#prefab").val());
+        formData.append("width", $("#width").val());
+        formData.append("height", $("#height").val());
+        formData.append("pos_x", $("#pos_x").val());
+        formData.append("pos_y", $("#pos_y").val());
+        formData.append("map", filter_name);
+        $.ajax({
+            type: "POST",
+            url: "{% url 'map:grid_view' %}",
+            data: formData,
+            contentType: false,
+            processData: false,
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader('X-CSRFToken', csrfToken);
+            },
+            success(response) {
+                if (response.success == false) {
+                    alert(response.error);
+                }
+                else {
+                    var grid_part_id = $("#H" + $("#pos_y").val() + "W" + $("#pos_x").val() + "content");
+                    var tempimage = response.imageurl
+                    if (tempimage == null || tempimage == "") {
+                        tempimage = "/media/defaultIMG.png";
+                    }
+                    image_html = `<img src="` + tempimage + `" alt=""
+                    style="object-fit: cover; height: 85%; width: 85%;  cursor: pointer;">`;
+                    grid_part_id.empty();
+                    grid_part_id.append(image_html)
+                    closeModal();
+                }
+            },
+            error(response) {
+                console.log(response);
+            }
+        });
     }
 
 </script>

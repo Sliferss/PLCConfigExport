@@ -15,18 +15,128 @@ class GridView(View):
 
     def get(self, request, *args, **kwargs):
         context = {}
-        if request.GET.get("type") == "filter":
+        type = request.GET.get("type")
+        if type == "filter":
             context = self.populate_prefabs(request, context)
             return JsonResponse(context)
-        if request.GET.get("type") == "prefab_get":
+        if type == "prefab_get":
             context = self.get_prefab(request, context)
+            return JsonResponse(context)
+        if type == "grid_images":
+            context = self.initiate_grid_parts(request, context)
+            return JsonResponse(context)
+        if type == "grid_part_list":
+            context = self.get_grid_parts_list(request, context)
+            return JsonResponse(context)
+        if type == "grid_part_edit_form":
+            context = self.get_grid_part(request, context)
+        if type == "delete":
+            context = self.delete_grid_part(request, context)
             return JsonResponse(context)
         if not is_ajax(request):
             context = self.initiate_grid(request, context)
             return render(request, self.template_name, context)
+        return JsonResponse(context)
+        
+    def post(self, request, *args, **kwargs):
+        context = {}
+        type = request.POST.get("type")
+        if type == "create":
+            context = self.handle_create_grid_part(request, context)
+            return JsonResponse(context)
+        if type == "edit":
+            context = self.handle_edit_grid_part(request, context)
+            return JsonResponse(context)
+        return JsonResponse(context)
+
+    def delete_grid_part(self, request, context):
+        map = request.GET.get("map")
+        name = request.GET.get("name")
+        grid_parts_obj = GridParts.objects.filter(map__name=map, name=name).first()
+        pos_x = grid_parts_obj.position_x
+        pos_y = grid_parts_obj.position_y
+        context["success"] = True
+        if grid_parts_obj:
+            grid_parts_obj.delete()
+            context["success"] = True
+        if not grid_parts_obj:
+            context["success"] = False
+            context["error"] = "GRID PART NOT FOUND"
+        grid_parts_obj = GridParts.objects.filter(map__name=map, position_x=pos_x, position_y=pos_y).first()
+        context["addimage"] = False
+        if grid_parts_obj:
+            context["imageurl"] = grid_parts_obj.image.url
+            context["addimage"] = True
+        return context
+
+    def get_grid_part(self, request, context):
+        map = request.GET.get("map")
+        name = request.GET.get("name")
+        grid_parts_obj = GridParts.objects.filter(map__name=map, name=name)
+        context["success"] = True
+        if not grid_parts_obj:
+            context["success"] = False
+            context["error"] = "GRID PART NOT FOUND"
+        context["grid_parts"] = list(grid_parts_obj.values())
+        return context
+
+    def get_grid_parts_list(self, request, context):
+        map = request.GET.get("map")
+        pos_x = request.GET.get("pos_x")
+        pos_y = request.GET.get("pos_y")
+        grid_parts_obj = GridParts.objects.filter(map__name=map, position_x=pos_x, position_y=pos_y)
+        context["grid_parts"] = list(grid_parts_obj.values())
+        return context
+
+    def initiate_grid_parts(self, request, context):
+        map = request.GET.get("map")
+        grid_parts_obj = GridParts.objects.filter(map__name=map)
+        context["grid_parts"] = list(grid_parts_obj.values())
+        return context
+
+    def handle_edit_grid_part(self, request, context):
+        name = request.POST.get("name")
+        map = request.POST.get("map")
+        position_x = request.POST.get("pos_x")
+        position_y = request.POST.get("pos_y")
+        grid_part_obj = GridParts.objects.filter(name=name, map__name=map, position_x=position_x, position_y=position_y).first()
+        if not grid_part_obj:
+            context["error"] = "Grid Part does not exist reload page and try again."
+            context["success"] = False
+            return context
+
+        grid_part_obj.width = request.POST.get("width")
+        grid_part_obj.height = request.POST.get("height")
+        context["imageurl"] = None
+        if grid_part_obj.image:
+            context["imageurl"] = grid_part_obj.image.url
+        grid_part_obj.save()
+        context["success"] = True
+        return context
+
+    def handle_create_grid_part(self, request, context):
+        name = request.POST.get("name")
+        map = request.POST.get("map")
+        map_obj = MapSetup.objects.filter(name=map).first()
+        if GridParts.objects.filter(name=name, map=map_obj):
+            context["error"] = "This name already exists for this Grid Map"
+            context["success"] = False
+            return context
+        grid_part_obj = GridParts.objects.create(name=name, map=map_obj)
+        grid_part_obj.position_x = request.POST.get("pos_x")
+        grid_part_obj.position_y = request.POST.get("pos_y")
+        grid_part_obj.width = request.POST.get("width")
+        grid_part_obj.height = request.POST.get("height")
+        prefab_obj = PrefabsConveyor.objects.filter(name=request.POST.get("prefab")).first()
+        context["imageurl"] = None
+        if prefab_obj.image:
+            grid_part_obj.image = prefab_obj.image
+            context["imageurl"] = prefab_obj.image.url
+        grid_part_obj.save()
+        context["success"] = True
+        return context
 
     def get_prefab(self, request, context):
-        print(request.GET.get("prefab"))
         prefab = PrefabsConveyor.objects.filter(name=request.GET.get("prefab"))
         context["success"] = True
         if not prefab:
@@ -37,7 +147,7 @@ class GridView(View):
 
     def populate_prefabs(self, request, context):
         prefabs = PrefabsConveyor.objects.all()
-        prefab_filter = request.GET.get("prefab_filter")
+        prefab_filter = request.GET.get("filter_name")
         if prefab_filter:
             prefabs = prefabs.filter(name__icontains=prefab_filter)
         context["prefab_filter"] = prefab_filter
@@ -47,6 +157,8 @@ class GridView(View):
     def initiate_grid(self, request, context):
         name = request.GET.get("filter_name")
         map_setup = MapSetup.objects.filter(name=name).first()
+        if not map_setup:
+            return context
         context["grid_width"] = map_setup.grid_width
         context["grid_height"] = map_setup.grid_height
         context["filter_name"] = name
