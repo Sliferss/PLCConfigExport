@@ -1,9 +1,5 @@
 <script>
 
-    var modal = $('#modal');
-    var modalContent = $('.modal-content');
-    var modalBody = $('#modal-body');
-
     var filterButton = $("#filter_button");
 
     $("#filter_button").on("click", function () {
@@ -23,36 +19,6 @@
             generateExistingForm(formType);
         }
     });
-
-    function addHtmlToModal(formHtml) {
-        modalBody.html(formHtml);
-        modal.show();
-        setTimeout(function () {
-            modalContent.addClass('show');
-        }, 10);
-    }
-
-    $('.close').on('click', function () {
-        closeModal();
-    });
-
-    $('.close_button').on('click', function () {
-        console.log("close click");
-        closeModal();
-    });
-
-    $(window).on('click', function (event) {
-        if (event.target.id === 'modal') {
-            closeModal();
-        }
-    });
-
-    function closeModal() {
-        modalContent.removeClass('show');
-        setTimeout(function () {
-            modal.hide();
-        }, 50);
-    }
 
     function generateExistingForm(formType) {
         $.ajax({
