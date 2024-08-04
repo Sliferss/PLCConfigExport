@@ -43,11 +43,11 @@
                 for (var key in response.grid_parts) {
                     var temp_id = $("#H" + response.grid_parts[key].position_y + "W" + response.grid_parts[key].position_x + "content");
                     if (temp_id.find("img").length == 0) {
-                        var tempimage = response.grid_parts[key].image
-                        if (tempimage == null || tempimage == "") {
-                            tempimage = "defaultIMG.png";
+                        var tempimage = "/media/" + response.grid_parts[key].image
+                        if (response.grid_parts[key].image == null || response.grid_parts[key].image == "") {
+                            tempimage = "/static/defaultIMG.png";
                         }
-                        image_html = `<img src="/media/` + tempimage + `" alt=""
+                        image_html = `<img src="` + tempimage + `" alt=""
                         style="object-fit: cover; height: 85%; width: 85%; cursor: pointer;">`;
                         temp_id.empty();
                         temp_id.append(image_html);
@@ -91,16 +91,16 @@
         var loop_count = 0;
         var tempimage = "";
         for (var key in prefabs_list) {
-            var tempimage = prefabs_list[key].image
-            if (tempimage == null || tempimage == "") {
-                tempimage = "defaultIMG.png";
+            var tempimage = "/media/" + prefabs_list[key].image
+            if (prefabs_list[key].image == null || prefabs_list[key].image == "") {
+                tempimage = "/static/defaultIMG.png";
             }
             if (loop_count == 0) {
                 prefabs_string += `<div class="row no-gutters">`;
                 prefabs_string += `<div class="col">
                                     <div class="square" style="cursor: pointer;">
                                         <div class="square-content rounded draggable" id="`+ prefabs_list[key].name + `">
-                                            <img src="/media/`+ tempimage + `" alt=""
+                                            <img src="`+ tempimage + `" alt=""
                                             style="object-fit: cover; height: 85%; width: 85%;">
                                         </div>
                                     </div>
@@ -114,7 +114,7 @@
                 prefabs_string += `<div class="col">
                                         <div class="square" style="cursor: pointer;">
                                             <div class="square-content rounded draggable" id="`+ prefabs_list[key].name + `">
-                                                <img src="/media/`+ tempimage + `" alt=""
+                                                <img src="`+ tempimage + `" alt=""
                                                 style="object-fit: cover; height: 85%; width: 85%;">
                                             </div>
                                         </div>
@@ -226,6 +226,16 @@
                 }
                 var html_for_form = edit_form_modal_html(response);
                 addHtmlToModal(html_for_form);
+                var data = response.grid_parts[0];
+                if (data.head_pec_fitted) {
+                    $("#head_pec_fitted").prop("checked", true);
+                }
+                if (data.encoder_fitted) {
+                    $("#encoder_fitted").prop("checked", true);
+                }
+                if (data.tail_pec_fitted) {
+                    $("#tail_pec_fitted").prop("checked", true);
+                }
             },
             error(response) {
                 console.log(response);
@@ -234,27 +244,54 @@
     }
 
     function edit_form_modal_html(response) {
-        prefab = response.grid_parts[0];
+        data = response.grid_parts[0];
         return `
             <h2 class="text-white text-center">Edit Grid Part</h2>
             <form class="forms-sample" id="myForm">
                 {% csrf_token %}
                 <div class="form-group row d-flex justify-content-between">
-                `+ form_helper_12("text", "name", "Name", prefab.name, "readonly") + `
+                `+ form_helper_12("text", "name", "Name", data.name) + `
                 </div>
                 <div class="form-group row d-flex justify-content-between">
-                `+ form_helper_6("number", "width", "Width", prefab.width, "") + `
-                `+ form_helper_6("number", "height", "Height", prefab.height, "") + `
+                `+ form_helper_4("number", "speed1", "Speed 1", data.speed1, "step='0.01'") + `
+                `+ form_helper_4("number", "speed2", "Speed 2", data.speed2, "step='0.01'") + `
+                `+ form_helper_4("number", "speed3", "Speed 3", data.speed3, "step='0.01'") + `
                 </div>
                 <div class="form-group row d-flex justify-content-between">
-                `+ form_helper_6("number", "pos_x", "Position X", prefab.position_x, "readonly") + `
-                `+ form_helper_6("number", "pos_y", "Position Y", prefab.position_y, "readonly") + `
+                `+ form_helper_4("number", "stand_by_time", "Stand By Time", data.stand_by_time, "") + `
+                `+ form_helper_4("checkbox", "head_pec_fitted", "Head PEC Fitted", data.head_pec_fitted, "") + `
+                `+ form_helper_4("checkbox", "tail_pec_fitted", "Tail PEC Fitted", data.tail_pec_fitted, "") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between">
+                `+ form_helper_4("number", "head_pect_distance", "Head PEC Distance", data.head_pect_distance, "") + `
+                `+ form_helper_4("number", "tail_pect_distance", "Tail PEC Distance", data.tail_pect_distance, "") + `
+                `+ form_helper_4("number", "cm_number", "CM Number", data.cm_number, "") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between">
+                `+ form_helper_4("checkbox", "encoder_fitted", "Encoder Fitted", data.encoder_fitted, "") + `
+                `+ form_helper_4("number", "ramp_up", "Ramp Up", data.ramp_up, "") + `
+                `+ form_helper_4("number", "ramp_down", "Ramp Down", data.ramp_down, "") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between">
+                
+                `+ form_helper_4("number", "start_position_fwd", "Start Pos FWD", data.start_position_fwd, "") + `
+                `+ form_helper_4("number", "start_position_rev", "Start Pos REV", data.start_position_rev, "") + `
+                `+ form_helper_4("number", "group_id", "Group ID", data.group_id, "") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between">
+                `+ form_helper_4("number", "cm_head", "CM Head", data.cm_head, "") + `
+                `+ form_helper_4("number", "cm_tail", "CM Tail", data.cm_tail, "") + `
+                `+ form_helper_4("file", "image_id", "Image", "", "") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between">
+                `+ form_helper_6("number", "pos_x", "Position X", data.position_x, "readonly") + `
+                `+ form_helper_6("number", "pos_y", "Position Y", data.position_y, "readonly") + `
                 </div>
                 <div class="form-group row d-flex justify-content-between">
                     <div class="col-sm-12 col-md-3 btn btn-primary px-2" onclick="submit_form('edit')">
                         Submit
                     </div>
-                    <div class="col-sm-12 col-md-3 btn btn-danger px-2" onclick="delete_form('` + prefab.name + `')">
+                    <div class="col-sm-12 col-md-3 btn btn-danger px-2" onclick="delete_form('` + data.name + `')">
                         Delete
                     </div>
                     <div class="col-sm-12 col-md-3 btn btn-secondary px-2" onclick="closeModal()">
@@ -283,8 +320,8 @@
                         return;
                     }
                     var tempimage = response.imageurl
-                    if (tempimage == null || tempimage == "") {
-                        tempimage = "defaultIMG.png";
+                    if (response.imageurl == null || response.imageurl == "") {
+                        tempimage = "/static/defaultIMG.png";
                     }
                     image_html = `<img src="` + tempimage + `" alt=""
                         style="object-fit: cover; height: 85%; width: 85%;  cursor: pointer;">`;
@@ -316,7 +353,7 @@
             success(response) {
                 console.log(response);
                 var html_for_form = list_modal_html(response, grid_coords);
-                if(!html_for_form){
+                if (!html_for_form) {
                     return;
                 }
                 addHtmlToModal(html_for_form);
@@ -335,18 +372,16 @@
         var tempimage = "";
         var prefabs_name_string = "";
         for (var key in prefabs_list) {
-            if (prefabs_list[key].image == "") {
-                tempimage = "defaultIMG.png";
-            }
-            else {
-                tempimage = prefabs_list[key].image;
+            tempimage = "/media/" + prefabs_list[key].image
+            if (prefabs_list[key].image == null || prefabs_list[key].image == "") {
+                tempimage = "/static/defaultIMG.png";
             }
             if (loop_count == 0) {
                 prefabs_string += `<div class="row no-gutters">`;
                 prefabs_string += `<div class="col">
                                     <div class="square black_border" style="cursor: pointer;">
                                         <div class="square-content rounded editform" id="`+ prefabs_list[key].name + `editform">
-                                            <img src="/media/`+ tempimage + `" alt=""
+                                            <img src="`+ tempimage + `" alt=""
                                             style="object-fit: cover; height: 85%; width: 85%;">
                                         </div>
                                     </div>
@@ -360,7 +395,7 @@
                 prefabs_string += `<div class="col">
                                         <div class="square black_border" style="cursor: pointer;">
                                             <div class="square-content rounded editform" id="`+ prefabs_list[key].name + `editform">
-                                                <img src="/media/`+ tempimage + `" alt=""
+                                                <img src="`+ tempimage + `" alt=""
                                                 style="object-fit: cover; height: 85%; width: 85%;">
                                             </div>
                                         </div>
@@ -413,8 +448,18 @@
                     return
                 }
                 grid_coords = extract_coords(grid_id);
-                var html_for_form = create_modal_form(response, grid_coords);
+                var html_for_form = create_modal_form(response, grid_coords, prefab_id);
                 addHtmlToModal(html_for_form);
+                var data = response.prefab[0];
+                if (data.head_pec_fitted) {
+                    $("#head_pec_fitted").prop("checked", true);
+                }
+                if (data.encoder_fitted) {
+                    $("#encoder_fitted").prop("checked", true);
+                }
+                if (data.tail_pec_fitted) {
+                    $("#tail_pec_fitted").prop("checked", true);
+                }
             },
             error(response) {
                 console.log(response);
@@ -432,19 +477,94 @@
         return { H: h_number, W: w_number };
     }
 
-    function create_modal_form(response) {
-        prefab = response.prefab[0];
+    $(document).on("click", "#head_pec_fitted", function (event) {
+        if ($(this).is(":checked")) {
+            $(this).val("true");
+        } else {
+            $(this).val("false");
+        }
+    });
+
+    $(document).on("click", "#tail_pec_fitted", function (event) {
+        if ($(this).is(":checked")) {
+            $(this).val("true");
+        } else {
+            $(this).val("false");
+        }
+    });
+
+    $(document).on("click", "#encoder_fitted", function (event) {
+        if ($(this).is(":checked")) {
+            $(this).val("true");
+        } else {
+            $(this).val("false");
+        }
+    });
+
+    $(document).on("click", ".export_button", function (event) {
+        $.ajax({
+            type: "GET",
+            url: "{% url 'map:grid_view' %}",
+            data: {
+                type: "export",
+                map: filter_name
+            },
+            success(response) {
+                var temp_a = document.createElement('a');
+                var temp_url = window.URL.createObjectURL(new Blob([response], { type: 'text/csv' }));
+                temp_a.href = temp_url;
+                temp_a.download = 'filtered_data.csv';
+                document.body.append(temp_a);
+                temp_a.click();
+                temp_a.remove();
+                window.URL.revokeObjectURL(temp_url);
+            },
+            error(response) {
+                console.log(response);
+            }
+        });
+    });
+
+    function create_modal_form(response, grid_coords, prefab_id) {
+        data = response.prefab[0];
         return `
             <h2 class="text-white text-center">Create Grid Part</h2>
             <form class="forms-sample" id="myForm">
                 {% csrf_token %}
                 <div class="form-group row d-flex justify-content-between">
-                `+ form_helper_6("text", "name", "Name", "", "") + `
-                `+ form_helper_6("text", "prefab", "Prefab", prefab.name, "readonly") + `
+                `+ form_helper_8("text", "name", "Name", "", "") + `
+                `+ form_helper_4("text", "prefab", "Prefab", prefab_id, "") + `
                 </div>
                 <div class="form-group row d-flex justify-content-between">
-                `+ form_helper_6("number", "width", "Width", prefab.width, "readonly") + `
-                `+ form_helper_6("number", "height", "Height", prefab.height, "readonly") + `
+                `+ form_helper_4("number", "speed1", "Speed 1", data.speed1, "step='0.01'") + `
+                `+ form_helper_4("number", "speed2", "Speed 2", data.speed2, "step='0.01'") + `
+                `+ form_helper_4("number", "speed3", "Speed 3", data.speed3, "step='0.01'") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between">
+                `+ form_helper_4("number", "stand_by_time", "Stand By Time", data.stand_by_time, "") + `
+                `+ form_helper_4("checkbox", "head_pec_fitted", "Head PEC Fitted", data.head_pec_fitted, "") + `
+                `+ form_helper_4("checkbox", "tail_pec_fitted", "Tail PEC Fitted", data.tail_pec_fitted, "") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between">
+                `+ form_helper_4("number", "head_pect_distance", "Head PEC Distance", data.head_pect_distance, "") + `
+                `+ form_helper_4("number", "tail_pect_distance", "Tail PEC Distance", data.tail_pect_distance, "") + `
+                `+ form_helper_4("number", "cm_number", "CM Number", data.cm_number, "") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between">
+                `+ form_helper_4("checkbox", "encoder_fitted", "Encoder Fitted", data.encoder_fitted, "") + `
+                `+ form_helper_4("number", "ramp_up", "Ramp Up", data.ramp_up, "") + `
+                `+ form_helper_4("number", "ramp_down", "Ramp Down", data.ramp_down, "") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between">
+                
+                `+ form_helper_4("number", "start_position_fwd", "Start Pos FWD", data.start_position_fwd, "") + `
+                `+ form_helper_4("number", "start_position_rev", "Start Pos REV", data.start_position_rev, "") + `
+                `+ form_helper_4("number", "group_id", "Group ID", data.group_id, "") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between">
+                `+ form_helper_4("number", "cm_head", "CM Head", data.cm_head, "") + `
+                `+ form_helper_4("number", "cm_tail", "CM Tail", data.cm_tail, "") + `
+                `+ form_helper_4("file", "image_id", "Image", "", "") + `
                 </div>
                 <div class="form-group row d-flex justify-content-between">
                 `+ form_helper_6("number", "pos_x", "Position X", grid_coords.W, "readonly") + `
@@ -462,12 +582,40 @@
     function submit_form(type) {
         var formData = new FormData();
         var name = $("#name").val();
+        var image = $("#image_id")[0];
+        if (image) {
+            if (image.files.length > 0) {
+                image = image.files[0];
+            }
+            else {
+                image = null;
+            }
+        }
+        else {
+            image = null;
+        }
         var csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
         formData.append('name', name);
         formData.append("type", type);
+        formData.append('image', image);
         formData.append("prefab", $("#prefab").val());
-        formData.append("width", $("#width").val());
-        formData.append("height", $("#height").val());
+        formData.append("speed1", $("#speed1").val());
+        formData.append("speed2", $("#speed2").val());
+        formData.append("speed3", $("#speed3").val());
+        formData.append("stand_by_time", $("#stand_by_time").val());
+        formData.append("head_pec_fitted", $("#head_pec_fitted").val());
+        formData.append("tail_pec_fitted", $("#tail_pec_fitted").val());
+        formData.append("head_pect_distance", $("#head_pect_distance").val());
+        formData.append("tail_pect_distance", $("#tail_pect_distance").val());
+        formData.append("cm_number", $("#cm_number").val());
+        formData.append("encoder_fitted", $("#encoder_fitted").is(":checked"));
+        formData.append("ramp_up", $("#ramp_up").val());
+        formData.append("ramp_down", $("#ramp_down").val());
+        formData.append("start_position_fwd", $("#start_position_fwd").val());
+        formData.append("start_position_rev", $("#start_position_rev").val());
+        formData.append("group_id", $("#group_id").val());
+        formData.append("cm_head", $("#cm_head").val());
+        formData.append("cm_tail", $("#cm_tail").val());
         formData.append("pos_x", $("#pos_x").val());
         formData.append("pos_y", $("#pos_y").val());
         formData.append("map", filter_name);
@@ -487,8 +635,8 @@
                 else {
                     var grid_part_id = $("#H" + $("#pos_y").val() + "W" + $("#pos_x").val() + "content");
                     var tempimage = response.imageurl
-                    if (tempimage == null || tempimage == "") {
-                        tempimage = "/media/defaultIMG.png";
+                    if (response.imageurl == null || response.imageurl == "") {
+                        tempimage = "/static/defaultIMG.png";
                     }
                     image_html = `<img src="` + tempimage + `" alt=""
                     style="object-fit: cover; height: 85%; width: 85%;  cursor: pointer;">`;

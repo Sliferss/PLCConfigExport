@@ -7,6 +7,8 @@ from django.utils.crypto import get_random_string
 from map.models import PrefabsConveyor, MapSetup, GridParts
 import os
 from django.conf import settings
+import csv
+from django.http import HttpResponse
 
 
 class GridView(View):
@@ -33,6 +35,8 @@ class GridView(View):
         if type == "delete":
             context = self.delete_grid_part(request, context)
             return JsonResponse(context)
+        if type == "export":
+            return self.handle_export(request)
         if not is_ajax(request):
             context = self.initiate_grid(request, context)
             return render(request, self.template_name, context)
@@ -41,6 +45,7 @@ class GridView(View):
     def post(self, request, *args, **kwargs):
         context = {}
         type = request.POST.get("type")
+        self.image = None
         if type == "create":
             context = self.handle_create_grid_part(request, context)
             return JsonResponse(context)
@@ -48,6 +53,27 @@ class GridView(View):
             context = self.handle_edit_grid_part(request, context)
             return JsonResponse(context)
         return JsonResponse(context)
+
+    def handle_export(self, request):
+        map = request.GET.get("map")
+        grid_obj = GridParts.objects.filter(map__name=map)
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="plc_'+map+'_export.csv"'
+        writer = csv.writer(response)
+        writer.writerow(["Name", "Speed1", "Speed2", "Speed3", 
+                         "Stand by time", "Head PEC fitted", "Tail PEC fitted",
+                         "Head PEC distance", "Tail PEC distance", "CM number",
+                         "Encoder fitted", "Ramp up", "Ramp down",
+                         "Start position FWD", "Start position REV", "Group Id",
+                         "CM head", "CM tail"])
+        for grid in grid_obj:
+            writer.writerow([grid.name, grid.speed1, grid.speed2, grid.speed3,
+                             grid.stand_by_time, grid.head_pec_fitted, grid.tail_pec_fitted,
+                             grid.head_pect_distance, grid.tail_pect_distance, grid.cm_number,
+                             grid.encoder_fitted, grid.ramp_up, grid.ramp_down,
+                             grid.start_position_fwd, grid.start_position_rev, grid.group_id,
+                             grid.cm_head, grid.cm_tail])
+        return response
 
     def delete_grid_part(self, request, context):
         map = request.GET.get("map")
@@ -104,9 +130,7 @@ class GridView(View):
             context["error"] = "Grid Part does not exist reload page and try again."
             context["success"] = False
             return context
-
-        grid_part_obj.width = request.POST.get("width")
-        grid_part_obj.height = request.POST.get("height")
+        grid_part_obj = self.fill_prefab_fields(request, grid_part_obj)
         context["imageurl"] = None
         if grid_part_obj.image:
             context["imageurl"] = grid_part_obj.image.url
@@ -125,8 +149,7 @@ class GridView(View):
         grid_part_obj = GridParts.objects.create(name=name, map=map_obj)
         grid_part_obj.position_x = request.POST.get("pos_x")
         grid_part_obj.position_y = request.POST.get("pos_y")
-        grid_part_obj.width = request.POST.get("width")
-        grid_part_obj.height = request.POST.get("height")
+        grid_part_obj = self.fill_prefab_fields(request, grid_part_obj)
         prefab_obj = PrefabsConveyor.objects.filter(name=request.POST.get("prefab")).first()
         context["imageurl"] = None
         if prefab_obj.image:
@@ -135,6 +158,37 @@ class GridView(View):
         grid_part_obj.save()
         context["success"] = True
         return context
+
+
+    def fill_prefab_fields(self, request, prefab_obj):
+        rest_post = request.POST
+        prefab_obj.speed1 = rest_post.get("speed1")
+        prefab_obj.speed2 = rest_post.get("speed2")
+        prefab_obj.speed3 = rest_post.get("speed3")
+        prefab_obj.stand_by_time = rest_post.get("stand_by_time")
+        prefab_obj.head_pec_fitted = False
+        if rest_post.get("head_pec_fitted").lower().capitalize() == "True":
+            prefab_obj.head_pec_fitted = True
+        prefab_obj.tail_pec_fitted = False
+        if rest_post.get("tail_pec_fitted").lower().capitalize() == "True":
+            prefab_obj.tail_pec_fitted = True
+        prefab_obj.head_pect_distance = rest_post.get("head_pect_distance")
+        prefab_obj.tail_pect_distance = rest_post.get("tail_pect_distance")
+        prefab_obj.cm_number = rest_post.get("cm_number")
+        prefab_obj.encoder_fitted = False
+        if rest_post.get("encoder_fitted").lower().capitalize() == "True":
+            prefab_obj.encoder_fitted = True
+        prefab_obj.ramp_up = rest_post.get("ramp_up")
+        prefab_obj.ramp_down = rest_post.get("ramp_down")
+        prefab_obj.start_position_fwd = rest_post.get("start_position_fwd")
+        prefab_obj.group_id = rest_post.get("group_id")
+        prefab_obj.cm_head = rest_post.get("cm_head")
+        prefab_obj.cm_tail = rest_post.get("cm_tail")
+        if self.image:
+            prefab_obj.image = self.upload_image()
+        prefab_obj.save()
+        return prefab_obj
+
 
     def get_prefab(self, request, context):
         prefab = PrefabsConveyor.objects.filter(name=request.GET.get("prefab"))

@@ -14,19 +14,23 @@ class PrefabsView(View):
 
     def post(self, request, *args, **kwargs):
         context = {}
-        context["error"] = False
-        self.original_name = request.POST.get("original_name")
-        self.name = request.POST.get('name')
-        if not self.name:
+        context["success"] = True
+        context["error"] = ""
+        name = request.POST.get('name')
+        if not name:
+            context["success"] = False
             context["error"] = "Missing Name!"
             return JsonResponse(context)
-        self.type = request.POST.get('type')
-        self.length = request.POST.get('length')
-        self.width = request.POST.get('width')
-        self.height = request.POST.get('height')
+        type = request.POST.get('type')
         self.image = request.FILES.get('image')
-        if self.type == "create":
-            context = self.handle_create(context)
+        if type == "create":
+            context = self.handle_create(request, context)
+            return JsonResponse(context)
+        if type == "update":
+            context = self.handle_update(request, context)
+            return JsonResponse(context)
+        context["success"] = False
+        context["error"] = "Did not reach correct method in view class"
         return JsonResponse(context)
 
     def get(self, request, *args, **kwargs):
@@ -49,13 +53,6 @@ class PrefabsView(View):
                 return JsonResponse(context)
             context["prefab"] = list(prefab_obj.values())
             return JsonResponse(context)
-        if type == "update":
-            context, name = self.name_check(request, context)
-            prefab_obj = PrefabsConveyor.objects.filter(name=name).first()
-            if not prefab_obj:
-                context["error"] = "Prefab Doesn't Exist!"
-                return JsonResponse(context)
-            context = self.handle_update(request, prefab_obj)
 
     def name_check(self, request, context):
         name = request.GET.get("name")
@@ -63,37 +60,60 @@ class PrefabsView(View):
             context["error"] = True
         return context, name
 
-    def handle_update(self, request, prefab_obj):
-        pass
-
-    def handle_create(self, context):
-        if self.original_name != self.name and PrefabsConveyor.objects.filter(name=self.name):
-            context["error"] = "Name Already Exists!"
-            return context
-        if not self.original_name == "create":
-            prefab_obj = PrefabsConveyor.objects.filter(name=self.original_name).first()
-            if self.name and self.name != self.original_name:
-                prefab_obj.name = self.name
-        else:
-            prefab_obj = PrefabsConveyor.objects.create(name=self.name)
-        prefab_obj = self.fill_prefab_fields(prefab_obj)
-        if not self.original_name == "create" and self.original_name != self.name:
-            old_prefab_obj = PrefabsConveyor.objects.filter(name=self.original_name)
-            if old_prefab_obj:
-                old_prefab_obj.delete()
-        context["success"] = "Created Prefab: " + self.name
+    def handle_update(self, request, context):
+        original_name = request.POST.get("original_name")
+        name = request.POST.get('name')
+        prefab_obj = PrefabsConveyor.objects.filter(name=name).first()
+        if not prefab_obj:
+            prefab_obj = PrefabsConveyor.objects.create(name=name)
+        prefab_obj = self.fill_prefab_fields(request, prefab_obj)
+        context["success"] = True
+        context["error"] = "Edited Prefab " + name + "!"
+        if name != original_name:
+            old_obj = PrefabsConveyor.objects.filter(name=original_name)
+            if old_obj:
+                old_obj.delete()
         return context
 
-    def fill_prefab_fields(self, prefab_obj):
-        if self.length:
-            prefab_obj.length = self.length
-        if self.width:
-            prefab_obj.width = self.width
-        if self.height:
-            prefab_obj.height = self.height
+    def handle_create(self, request, context):
+        original_name = request.POST.get("original_name")
+        name = request.POST.get('name')
+        if PrefabsConveyor.objects.filter(name=name):
+            context["success"] = False
+            context["error"] = "Name Already Exists!"
+            return context
+        prefab_obj = PrefabsConveyor.objects.create(name=name)
+        prefab_obj = self.fill_prefab_fields(request, prefab_obj)
+        context["success"] = True
+        context["error"] = "Created Prefab " + name + "!"
+        return context
+
+    def fill_prefab_fields(self, request, prefab_obj):
+        rest_post = request.POST
+        prefab_obj.speed1 = rest_post.get("speed1")
+        prefab_obj.speed2 = rest_post.get("speed2")
+        prefab_obj.speed3 = rest_post.get("speed3")
+        prefab_obj.stand_by_time = rest_post.get("stand_by_time")
+        prefab_obj.head_pec_fitted = False
+        if rest_post.get("head_pec_fitted").lower().capitalize() == "True":
+            prefab_obj.head_pec_fitted = True
+        prefab_obj.tail_pec_fitted = False
+        if rest_post.get("tail_pec_fitted").lower().capitalize() == "True":
+            prefab_obj.tail_pec_fitted = True
+        prefab_obj.head_pect_distance = rest_post.get("head_pect_distance")
+        prefab_obj.tail_pect_distance = rest_post.get("tail_pect_distance")
+        prefab_obj.cm_number = rest_post.get("cm_number")
+        prefab_obj.encoder_fitted = False
+        if rest_post.get("encoder_fitted").lower().capitalize() == "True":
+            prefab_obj.encoder_fitted = True
+        prefab_obj.ramp_up = rest_post.get("ramp_up")
+        prefab_obj.ramp_down = rest_post.get("ramp_down")
+        prefab_obj.start_position_fwd = rest_post.get("start_position_fwd")
+        prefab_obj.group_id = rest_post.get("group_id")
+        prefab_obj.cm_head = rest_post.get("cm_head")
+        prefab_obj.cm_tail = rest_post.get("cm_tail")
         if self.image:
             prefab_obj.image = self.upload_image()
-            prefab_obj.save()
         prefab_obj.save()
         return prefab_obj
 

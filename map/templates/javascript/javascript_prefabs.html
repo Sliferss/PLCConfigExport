@@ -1,6 +1,7 @@
 <script>
 
     var filterButton = $("#filter_button");
+    var original_name = "";
 
     $("#filter_button").on("click", function () {
         var name = $("#filter_name").val();
@@ -17,6 +18,30 @@
         }
         else {
             generateExistingForm(formType);
+        }
+    });
+
+    $(document).on("click", "#head_pec_fitted", function (event) {
+        if ($(this).is(":checked")) {
+            $(this).val("true");
+        } else {
+            $(this).val("false");
+        }
+    });
+
+    $(document).on("click", "#tail_pec_fitted", function (event) {
+        if ($(this).is(":checked")) {
+            $(this).val("true");
+        } else {
+            $(this).val("false");
+        }
+    });
+
+    $(document).on("click", "#encoder_fitted", function (event) {
+        if ($(this).is(":checked")) {
+            $(this).val("true");
+        } else {
+            $(this).val("false");
         }
     });
 
@@ -37,6 +62,16 @@
 
                 formHtml = createExistingForm(response);
                 addHtmlToModal(formHtml);
+                var data = response.prefab[0];
+                if (data.head_pec_fitted) {
+                    $("#head_pec_fitted").prop("checked", true);
+                }
+                if (data.encoder_fitted) {
+                    $("#encoder_fitted").prop("checked", true);
+                }
+                if (data.tail_pec_fitted) {
+                    $("#tail_pec_fitted").prop("checked", true);
+                }
             },
             error(response) {
                 console.log(response);
@@ -48,23 +83,47 @@
 
     function createExistingForm(response) {
         var data = response.prefab[0];
+        original_name = data.name;
         return `
             <h2 class="text-white text-center">Conveyor Prefab `+ data.name + `</h2>
             <form class="forms-sample" id="myForm">
                 {% csrf_token %}
                 <div class="form-group row d-flex justify-content-between">
-                `+ form_helper_6("text", "name", "Name", data.name) + `
-                `+ form_helper_6("number", "length", "Length", data.length, "step='0.01'") + `
+                `+ form_helper_12("text", "name", "Name", data.name, "") + `
                 </div>
                 <div class="form-group row d-flex justify-content-between">
-                `+ form_helper_6("number", "width", "Width", data.width, "step='0.01'") + `
-                `+ form_helper_6("number", "height", "Height", data.height, "step='0.01'") + `
-                </div>
-                <div class="form-group row d-flex">
-                `+ form_helper_6("file", "image", "Image", "") + `
+                `+ form_helper_4("number", "speed1", "Speed 1", data.speed1, "step='0.01'") + `
+                `+ form_helper_4("number", "speed2", "Speed 2", data.speed2, "step='0.01'") + `
+                `+ form_helper_4("number", "speed3", "Speed 3", data.speed3, "step='0.01'") + `
                 </div>
                 <div class="form-group row d-flex justify-content-between">
-                    <div class="col-sm-12 col-md-12 btn btn-primary" onclick="submit_form('`+ data.name + `')">
+                `+ form_helper_4("number", "stand_by_time", "Stand By Time", data.stand_by_time, "") + `
+                `+ form_helper_4("checkbox", "head_pec_fitted", "Head PEC Fitted", data.head_pec_fitted, "") + `
+                `+ form_helper_4("checkbox", "tail_pec_fitted", "Tail PEC Fitted", data.tail_pec_fitted, "") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between">
+                `+ form_helper_4("number", "head_pect_distance", "Head PEC Distance", data.head_pect_distance, "") + `
+                `+ form_helper_4("number", "tail_pect_distance", "Tail PEC Distance", data.tail_pect_distance, "") + `
+                `+ form_helper_4("number", "cm_number", "CM Number", data.cm_number, "") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between">
+                `+ form_helper_4("checkbox", "encoder_fitted", "Encoder Fitted", data.encoder_fitted, "") + `
+                `+ form_helper_4("number", "ramp_up", "Ramp Up", data.ramp_up, "") + `
+                `+ form_helper_4("number", "ramp_down", "Ramp Down", data.ramp_down, "") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between">
+                
+                `+ form_helper_4("number", "start_position_fwd", "Start Pos FWD", data.start_position_fwd, "") + `
+                `+ form_helper_4("number", "start_position_rev", "Start Pos REV", data.start_position_rev, "") + `
+                `+ form_helper_4("number", "group_id", "Group ID", data.group_id, "") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between">
+                `+ form_helper_4("number", "cm_head", "CM Head", data.cm_head, "") + `
+                `+ form_helper_4("number", "cm_tail", "CM Tail", data.cm_tail, "") + `
+                `+ form_helper_4("file", "image", "Image", "", "") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between">
+                    <div class="col-sm-12 col-md-12 btn btn-primary" onclick="submit_form('update')">
                         Submit
                     </div>
                 </div>
@@ -77,16 +136,38 @@
             <h2 class="text-white text-center">Create Conveyor Prefab</h2>
             <form class="forms-sample" id="myForm">
                 {% csrf_token %}
-                <div class="form-group row d-flex justify-content-between">
-                `+ form_helper_6("text", "name", "Name", "", "") + `
-                `+ form_helper_6("number", "length", "Length", "0", "step='0.01'") + `
+                <div class="form-group row d-flex justify-content-between border-bottom">
+                `+ form_helper_12("text", "name", "Name", "", "") + `
                 </div>
-                <div class="form-group row d-flex justify-content-between">
-                `+ form_helper_6("number", "width", "Width", "0", "step='0.01'") + `
-                `+ form_helper_6("number", "height", "Height", "0", "step='0.01'") + `
+                <div class="form-group row d-flex justify-content-between border-bottom">
+                `+ form_helper_4("number", "speed1", "Speed 1", "0", "step='0.01'") + `
+                `+ form_helper_4("number", "speed2", "Speed 2", "0", "step='0.01'") + `
+                `+ form_helper_4("number", "speed3", "Speed 3", "0", "step='0.01'") + `
                 </div>
-                <div class="form-group row d-flex">
-                `+ form_helper_6("file", "image", "Image", "", "") + `
+                <div class="form-group row d-flex justify-content-between border-bottom">
+                `+ form_helper_4("number", "stand_by_time", "Stand By Time", "0", "") + `
+                `+ form_helper_4("checkbox", "head_pec_fitted", "Head PEC Fitted", "false", "") + `
+                `+ form_helper_4("checkbox", "tail_pec_fitted", "Tail PEC Fitted", "false", "") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between border-bottom">
+                `+ form_helper_4("number", "head_pect_distance", "Head PEC Distance", "0", "") + `
+                `+ form_helper_4("number", "tail_pect_distance", "Tail PEC Distance", "0", "") + `
+                `+ form_helper_4("number", "cm_number", "CM Number", "0", "") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between border-bottom">
+                `+ form_helper_4("checkbox", "encoder_fitted", "Encoder Fitted", "false", "") + `
+                `+ form_helper_4("number", "ramp_up", "Ramp Up", "0", "") + `
+                `+ form_helper_4("number", "ramp_down", "Ramp Down", "0", "") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between border-bottom">
+                `+ form_helper_4("number", "start_position_fwd", "Start Pos FWD", "0", "") + `
+                `+ form_helper_4("number", "start_position_rev", "Start Pos REV", "0", "") + `
+                `+ form_helper_4("number", "group_id", "Group ID", "0", "") + `
+                </div>
+                <div class="form-group row d-flex justify-content-between border-bottom">
+                `+ form_helper_4("number", "cm_head", "CM Head", "0", "") + `
+                `+ form_helper_4("number", "cm_tail", "CM Tail", "0", "") + `
+                `+ form_helper_4("file", "image_id", "Image", "", "") + `
                 </div>
                 <div class="form-group row d-flex justify-content-between">
                     <div class="col-sm-12 col-md-12 btn btn-primary" onclick="submit_form('create')">
@@ -97,18 +178,45 @@
         `;
     }
 
-    function submit_form(original_name) {
+    function submit_form(type) {
         console.log("SUBMIT CLICKED");
         var formData = new FormData();
-        var image = $("#image")[0].files[0];
+        var image = $("#image_id")[0];
+        if (image) {
+            console.log("IMAGWE");
+            console.logs(image.files);
+            if (image.files.length > 0) {
+                image = image.files[0];
+            }
+            else {
+                image = null;
+            }
+        }
+        else {
+            image = null;
+        }
         var name = $("#name").val();
         var csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
         formData.append('image', image);
         formData.append('name', name);
-        formData.append("type", "create");
-        formData.append("length", $("#length").val());
-        formData.append("width", $("#width").val());
-        formData.append("height", $("#height").val());
+        formData.append("type", type);
+        formData.append("speed1", $("#speed1").val());
+        formData.append("speed2", $("#speed2").val());
+        formData.append("speed3", $("#speed3").val());
+        formData.append("stand_by_time", $("#stand_by_time").val());
+        formData.append("head_pec_fitted", $("#head_pec_fitted").val());
+        formData.append("tail_pec_fitted", $("#tail_pec_fitted").val());
+        formData.append("head_pect_distance", $("#head_pect_distance").val());
+        formData.append("tail_pect_distance", $("#tail_pect_distance").val());
+        formData.append("cm_number", $("#cm_number").val());
+        formData.append("encoder_fitted", $("#encoder_fitted").is(":checked"));
+        formData.append("ramp_up", $("#ramp_up").val());
+        formData.append("ramp_down", $("#ramp_down").val());
+        formData.append("start_position_fwd", $("#start_position_fwd").val());
+        formData.append("start_position_rev", $("#start_position_rev").val());
+        formData.append("group_id", $("#group_id").val());
+        formData.append("cm_head", $("#cm_head").val());
+        formData.append("cm_tail", $("#cm_tail").val());
         formData.append("original_name", original_name);
         $.ajax({
             type: "POST",
@@ -120,7 +228,8 @@
                 xhr.setRequestHeader('X-CSRFToken', csrfToken);
             },
             success(response) {
-                if (response.error != false) {
+                if (response.success != true) {
+                    console.log(response);
                     alert(response.error);
                 }
                 else {
